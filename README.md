@@ -1,1 +1,1 @@
-# godot-go
+# godotgo
