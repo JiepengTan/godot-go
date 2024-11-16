@@ -3,6 +3,7 @@
 CURRENT_PATH=$(shell pwd)
 .PHONY: engine init initweb fmt gen 
 
+
 fmt:
 	go fmt ./... 
 
@@ -13,5 +14,5 @@ web:
 	./cmd/scripts/init_web.sh 
 
 gen:
-	cd ./cmd/codegen && go run . && cd $(CURRENT_PATH) && \
+	cd ./cmd/codegen && go run . && cd ../../ && \
 	$(MAKE) fmt && $(MAKE) fmt 
