@@ -1,3 +1,5 @@
 /_debug_parsed_ast*
 /.vscode
 /__debug*
+/data/extension_api.json
+/data/gdextension_interface.h
