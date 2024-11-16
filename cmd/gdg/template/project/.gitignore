@@ -1,0 +1,12 @@
+# gdg specific ignores
+/.godot
+/.import
+/.builds
+*.translation
+/.mono
+/data_*
+/mono_crash.*.json
+
+
+# user specify ignores
+# ...
