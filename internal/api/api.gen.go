@@ -8,17 +8,11 @@
 //   code.
 //----------------------------------------------------------------------------
 */
-package gdx
-
-//revive:disable
+package api
 
 var (
-	api GDExtensionInterface
+	FFI GDExtensionInterface
 )
 
 type GDExtensionInterface struct {
-	// All of the GDExtension interface functions.
-}
-
-func (x *GDExtensionInterface) loadProcAddresses() {
 }

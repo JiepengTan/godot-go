@@ -1,11 +1,13 @@
-package common
+package generator
 
 import (
+	"bytes"
 	"fmt"
-	"sort"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
-	"unicode"
+	"text/template"
 
 	"github.com/JiepengTan/godotgo/cmd/codegen/gdextensionparser/clang"
 
@@ -349,7 +351,7 @@ func GetManagerFuncName(typeName string) string {
 
 func LoadProcAddressName(typeName string) string {
 	ret := strcase.ToSnake(typeName)
-	ret = strings.Replace(ret, "gd_extension_", "", 1)
+	ret = strings.Replace(ret, "gd_extension_interface_", "", 1)
 	ret = strings.Replace(ret, "_latin_1_", "_latin1_", 1)
 	ret = strings.Replace(ret, "_utf_8_", "_utf8_", 1)
 	ret = strings.Replace(ret, "_utf_16_", "_utf16_", 1)
@@ -378,61 +380,69 @@ func TrimPrefix(typeName, prefix string) string {
 }
 
 var (
-	managerSet = map[string]bool{}
-	cppType2Go = map[string]string{}
+	tempStrBuilder strings.Builder
 )
 
-func GetManagerName(str string) string {
-	prefix := "GDExtensionSpx"
-	str = str[len(prefix):]
-	chs := []rune{}
-	chs = append(chs, rune(str[0]), rune(str[1]))
-	for _, ch := range str[2:] {
-		if unicode.IsUpper(rune(ch)) {
-			break
-		}
-		chs = append(chs, rune(ch))
-	}
-	result := strings.ToLower(string(chs))
-	return result
+func WriteLine(format string, a ...any) {
+	Write(format, a...)
+	tempStrBuilder.WriteString("\n")
+}
+func Write(format string, a ...any) {
+	tempStrBuilder.WriteString(fmt.Sprintf(format, a...))
 }
 
-func IsManagerMethod(function *clang.TypedefFunction) bool {
-	return managerSet[GetManagerName(function.Name)]
-}
-func GetFuncParamTypeString(typeName string) string {
-	return cppType2Go[typeName]
+func renderCode(data any, projectPath string, relDir string,
+	fileName, templateFile string, funcs template.FuncMap) error {
+	defaultFuncs := template.FuncMap{
+		"gdiVariableName":     GdiVariableName,
+		"snakeCase":           strcase.ToSnake,
+		"camelCase":           strcase.ToCamel,
+		"goReturnType":        GoReturnType,
+		"goArgumentType":      GoArgumentType,
+		"goEnumValue":         GoEnumValue,
+		"add":                 Add,
+		"cgoCastArgument":     CgoCastArgument,
+		"cgoCastReturnType":   CgoCastReturnType,
+		"cgoCleanUpArgument":  CgoCleanUpArgument,
+		"trimPrefix":          TrimPrefix,
+		"loadProcAddressName": LoadProcAddressName,
+	}
+	for key, value := range funcs {
+		defaultFuncs[key] = value
+	}
+	tmpl, err := template.New(fileName).
+		Funcs(defaultFuncs).
+		Parse(templateFile)
+	if err != nil {
+		return err
+	}
+
+	var b bytes.Buffer
+	err = tmpl.Execute(&b, data)
+	if err != nil {
+		return err
+	}
+
+	headerFileName := filepath.Join(projectPath, relDir, fileName)
+	f, err := os.Create(headerFileName)
+	f.Write(b.Bytes())
+	f.Close()
+	return err
 }
 
-func GetManagers(ast clang.CHeaderFileAST) []string {
-	items := []string{}
-	for _, item := range ast.CollectGDExtensionInterfaceFunctions() {
-		items = append(items, item.Name)
+var (
+	relDir      string
+	projectPath string
+	ast         clang.CHeaderFileAST
+)
+
+func Setup(p_projectPath string, p_ast clang.CHeaderFileAST) {
+	projectPath, ast = p_projectPath, p_ast
+}
+func RenderCode(fileName, templateFile string, funcs template.FuncMap) error {
+	err := renderCode(ast, projectPath, relDir, fileName, templateFile, funcs)
+	if err != nil {
+		panic("renderCode error: " + err.Error())
 	}
-	managerSet = make(map[string]bool)
-	managers := []string{}
-	for _, str := range items {
-		managerSet[GetManagerName(str)] = true
-	}
-	delete(managerSet, "")
-	delete(managerSet, "string")
-	delete(managerSet, "variant")
-	delete(managerSet, "global")
-	for item := range managerSet {
-		managers = append(managers, item)
-	}
-	sort.Strings(managers)
-	cppType2Go = map[string]string{
-		"GdInt":    "int64",
-		"GdFloat":  "float32",
-		"GdObj":    "Object",
-		"GdVec2":   "Vec2",
-		"GdVec3":   "Vec3",
-		"GdVec4":   "Vec4",
-		"GdRect2":  "Rect2",
-		"GdString": "string",
-		"GdBool":   "bool",
-		"GdColor":  "Color",
-	}
-	return managers
+	return err
 }

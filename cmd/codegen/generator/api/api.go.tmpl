@@ -8,4 +8,12 @@
 //----------------------------------------------------------------------------*/
 {{ $view := . -}}
 
-package engine
+package api
+var (
+	FFI GDExtensionInterface
+)
+
+type GDExtensionInterface struct {
+{{ genAPIGo $view }}
+}
+

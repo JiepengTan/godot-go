@@ -13,7 +13,7 @@ import (
 	"github.com/JiepengTan/godotgo/cmd/codegen/extensionapiparser"
 	"github.com/JiepengTan/godotgo/cmd/codegen/gdextensionparser"
 	"github.com/JiepengTan/godotgo/cmd/codegen/gdextensionparser/clang"
-	"github.com/JiepengTan/godotgo/cmd/codegen/generate/ffi"
+	"github.com/JiepengTan/godotgo/cmd/codegen/generator"
 )
 
 var (
@@ -85,7 +85,9 @@ func generateCode() error {
 		if verbose {
 			println("Generating gdextension C wrapper functions...")
 		}
-		ffi.Generate(packagePath, ast)
+		generator.Setup(packagePath, ast)
+		generator.GenerateFFI()
+		generator.GenerateAPI()
 	}
 
 	if verbose {
