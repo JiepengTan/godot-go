@@ -9,13 +9,29 @@
 //   code.
 //----------------------------------------------------------------------------*/
 #include <stdlib.h>
-#include <gdextension_interface.h>
+#include <stdint.h>
+#include <stdio.h>
+#include "gdextension_interface.h" 
 
 typedef uintptr_t pointer;
 typedef const char* string;
 typedef char32_t rune;
 typedef uint8_t * bytes;
 typedef GDExtensionBool gdbool;
+typedef uintptr_t pointer;
+
+extern void initialize(void *userdata, GDExtensionInitializationLevel p_level);
+extern void deinitialize(void *userdata, GDExtensionInitializationLevel p_level);
+
+void initialization(GDExtensionInitialization *p_init) {
+	p_init->initialize = initialize;
+	p_init->deinitialize = deinitialize;
+}
+
+void *get_proc_address(uintptr_t fn, const char* p_name) {
+	return (void *)((GDExtensionInterfaceGetProcAddress)fn)(p_name);
+}
+
 
 void cgo_GDExtensionVariantFromTypeConstructorFunc(const GDExtensionVariantFromTypeConstructorFunc fn,GDExtensionUninitializedVariantPtr arg_0,GDExtensionTypePtr arg_1) {
  fn(arg_0,arg_1);
@@ -759,3 +775,8 @@ void cgo_GDExtensionInitialization_initialize(const GDExtensionInitialization * 
 void cgo_GDExtensionInitialization_deinitialize(const GDExtensionInitialization * p_struct,void *  userdata,GDExtensionInitializationLevel p_level) {
  p_struct->deinitialize(userdata,p_level);
 }
+
+
+
+
+#endif

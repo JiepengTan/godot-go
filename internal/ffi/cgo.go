@@ -7,6 +7,13 @@ import (
 )
 import "C"
 
+const (
+	GDExtensionInitializationLevelCore    GDExtensionInitializationLevel = 0
+	GDExtensionInitializationLevelServers GDExtensionInitializationLevel = 1
+	GDExtensionInitializationLevelScene   GDExtensionInitializationLevel = 2
+	GDExtensionInitializationLevelEditor  GDExtensionInitializationLevel = 3
+)
+
 var (
 	dlsymGD   func(string) unsafe.Pointer
 	callbacks gdx.CallbackInfo
@@ -27,15 +34,17 @@ func BindCallback(info gdx.CallbackInfo) {
 //export loadExtension
 func loadExtension(lookupFunc uintptr, classes, configuration unsafe.Pointer) uint8 {
 	dlsymGD = func(s string) unsafe.Pointer {
-		return getProcAddress(lookupFunc, s)
+		ptr := getProcAddress(lookupFunc, s)
+		if ptr == nil {
+			println("can not getProcAddress ", s)
+		}
+		return ptr
 	}
-
-	builtinAPI.loadProcAddresses()
 	api.loadProcAddresses()
+	bindFFI()
 	init := (*initialization)(configuration)
 	*init = initialization{}
 	init.minimum_initialization_level = initializationLevel(GDExtensionInitializationLevelScene)
 	doInitialization(init)
-	registerEngineCallback()
 	return 1
 }

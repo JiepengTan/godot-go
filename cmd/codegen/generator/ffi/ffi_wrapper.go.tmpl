@@ -12,14 +12,15 @@ package ffi
 
 //revive:disable
 
-// #include <gdextension_interface.h>
-// #include "ffi_wrapper.gen.h"
-// #include <stdint.h>
-// #include <stdio.h>
-// #include <stdlib.h>
+//#include "gdextension_interface.h"
+//#include "ffi_wrapper.gen.h"
 import "C"
+
+
 import (
 	"unsafe"
+
+	"github.com/JiepengTan/godotgo/internal/api"
 )
 
 // C type aliases
@@ -32,6 +33,8 @@ type Int16T C.int16_t
 type Int8T C.int8_t
 type Char C.char
 type WcharT C.wchar_t
+
+// aliases
 {{ range $i, $t := $view.CollectAliases -}}
 	type {{ camelCase $t.Name }} C.{{ $t.Name }}
 {{ end -}}
@@ -58,4 +61,21 @@ type {{ $f.Name }} C.{{ $f.Name }}
 
 
 
+type initialization = C.GDExtensionInitialization
+type initializationLevel = C.GDExtensionInitializationLevel
+
+func doInitialization(init *initialization) {
+	// TODO check string constructor
+	// stringInitConstructorBindings()
+	C.initialization(init)
+}
+func getProcAddress(handle uintptr, name string) unsafe.Pointer {
+	name = name + "\000"
+	char := C.CString(name)
+	defer C.free(unsafe.Pointer(char))
+	return C.get_proc_address(C.pointer(handle), char)
+}
+
+
+// TODO 参考godot-go 自动生成简要的ffi 之后，再手动的进行一次大的包装 类似gd
 {{ genFFIWrapperGo $view }}

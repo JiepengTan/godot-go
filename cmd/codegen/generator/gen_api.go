@@ -34,7 +34,7 @@ func genAPIGo(ast clang.CHeaderFileAST) string {
 		for j, a := range f.Arguments {
 			name := a.Name
 			if a.Name == "" {
-				name = fmt.Sprintf("_funcPtr%d ", j)
+				name = "p_func"
 			}
 			params += name + " " + ToGoTypeString(a.Type)
 			if a.Name == "" {
@@ -44,7 +44,12 @@ func genAPIGo(ast clang.CHeaderFileAST) string {
 				params += ","
 			}
 		}
-		WriteLine("%s func(%s)", strings.Replace(f.Name, "GDExtensionInterface", "", 1), params)
+
+		retStr := "" + toGoTypeString(f.ReturnType.GoString())
+		if retStr == "void" {
+			retStr = ""
+		}
+		WriteLine("%s func(%s) %s", strings.Replace(f.Name, "GDExtensionInterface", "", 1), params, retStr)
 	}
 	return tempStrBuilder.String()
 }
@@ -58,10 +63,11 @@ var (
 		"uint64_t":                   "uint64",
 		"GDObjectInstanceID":         "int64",
 		"GDExtensionInt":             "int64",
-		"GDExtensionVariantType":     "any/*VariantType*/",
-		"GDExtensionVariantOperator": "any/*VariantOperator*/",
+		"GDExtensionVariantType":     "uint32/*VariantType*/",
+		"GDExtensionVariantOperator": "uint32/*VariantOperator*/",
 		"GDExtensionBool":            "bool",
 		"char32_t":                   "rune",
+		"const char *":               "string",
 	}
 )
 

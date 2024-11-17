@@ -5,6 +5,7 @@ package generator
 
 import (
 	_ "embed"
+	"fmt"
 	"strings"
 	"text/template"
 
@@ -52,6 +53,62 @@ func genFFIGo(ast clang.CHeaderFileAST) string {
 
 func genFFIWrapperGo(ast clang.CHeaderFileAST) string {
 	tempStrBuilder = strings.Builder{}
+	funcs := ast.CollectGDExtensionInterfaceFunctions()
+	WriteLine("func bindFFI(){")
+	for _, f := range funcs {
+		WriteLine("api.FFI.%s = %s", strings.Replace(f.Name, "GDExtensionInterface", "", 1), "cgo_"+strings.Replace(f.Name, "GDExtensionInterface", "", 1))
+	}
+	WriteLine("}")
+
+	for _, f := range funcs {
+		// params
+		params := ""
+		for j, a := range f.Arguments {
+			name := a.Name
+			if a.Name == "" {
+				name = "p_func"
+			}
+			params += name + " " + ToGoTypeString(a.Type)
+			if a.Name == "" {
+				params += fmt.Sprintf("/*%s*/", a.Type.CStyleString())
+			}
+			if j != len(f.Arguments)-1 {
+				params += ","
+			}
+		}
+		// return value
+		retStr := toGoTypeString(f.ReturnType.GoString())
+		hasReturn := retStr != "void"
+		// body
+		body := ""
+		body += fmt.Sprintf("arg0 := (C.%s)(capi.%s)\n", f.Name, GdiVariableName(f.Name))
+		for j, a := range f.Arguments {
+			body += fmt.Sprintf("arg%d := %s\n", j+1, CgoCastArgument(a, fmt.Sprintf("inArg%d", j+1)))
+		}
+		if hasReturn {
+			body += "__retValue:= "
+		}
+		body += fmt.Sprintf("C.cgo_%s(", f.Name)
+		for i := 0; i < len(f.Arguments)+1; i++ {
+			body += fmt.Sprintf("arg%d ", i)
+			if i != len(f.Arguments) {
+				body += ","
+			}
+		}
+		body += ")\n"
+		if hasReturn {
+			if retStr == "bool" {
+				body += fmt.Sprintf("return __retValue != 0")
+			} else {
+				body += fmt.Sprintf("return (%s)(__retValue)", retStr)
+			}
+
+		}
+		if !hasReturn {
+			retStr = ""
+		}
+		WriteLine("func cgo_%s(%s) %s {%s\n}", strings.Replace(f.Name, "GDExtensionInterface", "", 1), params, retStr, body)
+	}
 	return tempStrBuilder.String()
 }
 

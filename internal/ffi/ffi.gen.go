@@ -11,7 +11,7 @@ package ffi
 //revive:disable
 
 var (
-	api GDExtensionInterface
+	capi GDExtensionInterface
 )
 
 type GDExtensionInterface struct {

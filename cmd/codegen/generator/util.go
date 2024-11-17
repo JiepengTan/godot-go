@@ -25,7 +25,20 @@ func Add(a int, b int) int {
 func Sub(a int, b int) int {
 	return a - b
 }
-func GoArgumentType(t clang.PrimativeType, name string) string {
+func GoArgumentName(a clang.Argument, defaultName string) string {
+	if a.Name != "" {
+		return a.Name
+	} else if a.Type.Function != nil && a.Type.Function.Name != "" {
+		return a.Type.Function.Name
+	} else {
+		return defaultName
+	}
+}
+func GoArgumentType(a clang.Argument, name string) string {
+	t := a.Type.Primative
+	if t == nil {
+		return "unsafe.Pointer"
+	}
 	n := strings.TrimSpace(t.Name)
 
 	hasReturnPrefix := strings.HasPrefix(name, "r_")
@@ -220,6 +233,12 @@ func CgoCastArgument(a clang.Argument, defaultName string) string {
 				}
 			} else {
 				panic(fmt.Sprintf("unhandled type: %s", t.CStyleString()))
+			}
+		case "GDExtensionBool":
+			if t.IsPointer {
+				return fmt.Sprintf("(*C.GDExtensionBool)(%s)", goVarName)
+			} else {
+				return fmt.Sprintf("ToGdBool(%s)", goVarName)
 			}
 		default:
 			if t.IsPointer {

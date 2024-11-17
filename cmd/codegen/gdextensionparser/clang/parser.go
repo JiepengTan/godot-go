@@ -208,7 +208,9 @@ func (t PrimativeType) CStyleString() string {
 	return sb.String()
 }
 func (t PrimativeType) GoString() string {
-	if t.IsPointer || strings.HasSuffix(t.Name, "Ptr") {
+	if t.IsPointer && t.Name == "char" && t.IsConst {
+		return "string"
+	} else if t.IsPointer || strings.HasSuffix(t.Name, "Ptr") {
 		return "unsafe.Pointer"
 	} else {
 		return t.Name

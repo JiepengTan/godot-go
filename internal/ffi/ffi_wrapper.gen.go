@@ -10,14 +10,14 @@ package ffi
 
 //revive:disable
 
-// #include <gdextension_interface.h>
-// #include "ffi_wrapper.gen.h"
-// #include <stdint.h>
-// #include <stdio.h>
-// #include <stdlib.h>
+//#include "gdextension_interface.h"
+//#include "ffi_wrapper.gen.h"
 import "C"
+
 import (
 	"unsafe"
+
+	"github.com/JiepengTan/godotgo/internal/api"
 )
 
 // C type aliases
@@ -30,6 +30,8 @@ type Int16T C.int16_t
 type Int8T C.int8_t
 type Char C.char
 type WcharT C.wchar_t
+
+// aliases
 type Char32T C.char32_t
 type Char16T C.char16_t
 type GdextensionVariantPtr C.GDExtensionVariantPtr
@@ -449,3 +451,1421 @@ type GDExtensionScriptInstanceInfo2 C.GDExtensionScriptInstanceInfo2
 type GDExtensionScriptInstanceInfo3 C.GDExtensionScriptInstanceInfo3
 type GDExtensionInitialization C.GDExtensionInitialization
 type GDExtensionGodotVersion C.GDExtensionGodotVersion
+type initialization = C.GDExtensionInitialization
+type initializationLevel = C.GDExtensionInitializationLevel
+
+func doInitialization(init *initialization) {
+	// TODO check string constructor
+	// stringInitConstructorBindings()
+	C.initialization(init)
+}
+func getProcAddress(handle uintptr, name string) unsafe.Pointer {
+	name = name + "\000"
+	char := C.CString(name)
+	defer C.free(unsafe.Pointer(char))
+	return C.get_proc_address(C.pointer(handle), char)
+}
+
+func bindFFI() {
+	api.FFI.GetProcAddress = cgo_GetProcAddress
+	api.FFI.GetGodotVersion = cgo_GetGodotVersion
+	api.FFI.MemAlloc = cgo_MemAlloc
+	api.FFI.MemRealloc = cgo_MemRealloc
+	api.FFI.MemFree = cgo_MemFree
+	api.FFI.PrintError = cgo_PrintError
+	api.FFI.PrintErrorWithMessage = cgo_PrintErrorWithMessage
+	api.FFI.PrintWarning = cgo_PrintWarning
+	api.FFI.PrintWarningWithMessage = cgo_PrintWarningWithMessage
+	api.FFI.PrintScriptError = cgo_PrintScriptError
+	api.FFI.PrintScriptErrorWithMessage = cgo_PrintScriptErrorWithMessage
+	api.FFI.GetNativeStructSize = cgo_GetNativeStructSize
+	api.FFI.VariantNewCopy = cgo_VariantNewCopy
+	api.FFI.VariantNewNil = cgo_VariantNewNil
+	api.FFI.VariantDestroy = cgo_VariantDestroy
+	api.FFI.VariantCall = cgo_VariantCall
+	api.FFI.VariantCallStatic = cgo_VariantCallStatic
+	api.FFI.VariantEvaluate = cgo_VariantEvaluate
+	api.FFI.VariantSet = cgo_VariantSet
+	api.FFI.VariantSetNamed = cgo_VariantSetNamed
+	api.FFI.VariantSetKeyed = cgo_VariantSetKeyed
+	api.FFI.VariantSetIndexed = cgo_VariantSetIndexed
+	api.FFI.VariantGet = cgo_VariantGet
+	api.FFI.VariantGetNamed = cgo_VariantGetNamed
+	api.FFI.VariantGetKeyed = cgo_VariantGetKeyed
+	api.FFI.VariantGetIndexed = cgo_VariantGetIndexed
+	api.FFI.VariantIterInit = cgo_VariantIterInit
+	api.FFI.VariantIterNext = cgo_VariantIterNext
+	api.FFI.VariantIterGet = cgo_VariantIterGet
+	api.FFI.VariantHash = cgo_VariantHash
+	api.FFI.VariantRecursiveHash = cgo_VariantRecursiveHash
+	api.FFI.VariantHashCompare = cgo_VariantHashCompare
+	api.FFI.VariantBooleanize = cgo_VariantBooleanize
+	api.FFI.VariantDuplicate = cgo_VariantDuplicate
+	api.FFI.VariantStringify = cgo_VariantStringify
+	api.FFI.VariantGetType = cgo_VariantGetType
+	api.FFI.VariantHasMethod = cgo_VariantHasMethod
+	api.FFI.VariantHasMember = cgo_VariantHasMember
+	api.FFI.VariantHasKey = cgo_VariantHasKey
+	api.FFI.VariantGetTypeName = cgo_VariantGetTypeName
+	api.FFI.VariantCanConvert = cgo_VariantCanConvert
+	api.FFI.VariantCanConvertStrict = cgo_VariantCanConvertStrict
+	api.FFI.GetVariantFromTypeConstructor = cgo_GetVariantFromTypeConstructor
+	api.FFI.GetVariantToTypeConstructor = cgo_GetVariantToTypeConstructor
+	api.FFI.VariantGetPtrOperatorEvaluator = cgo_VariantGetPtrOperatorEvaluator
+	api.FFI.VariantGetPtrBuiltinMethod = cgo_VariantGetPtrBuiltinMethod
+	api.FFI.VariantGetPtrConstructor = cgo_VariantGetPtrConstructor
+	api.FFI.VariantGetPtrDestructor = cgo_VariantGetPtrDestructor
+	api.FFI.VariantConstruct = cgo_VariantConstruct
+	api.FFI.VariantGetPtrSetter = cgo_VariantGetPtrSetter
+	api.FFI.VariantGetPtrGetter = cgo_VariantGetPtrGetter
+	api.FFI.VariantGetPtrIndexedSetter = cgo_VariantGetPtrIndexedSetter
+	api.FFI.VariantGetPtrIndexedGetter = cgo_VariantGetPtrIndexedGetter
+	api.FFI.VariantGetPtrKeyedSetter = cgo_VariantGetPtrKeyedSetter
+	api.FFI.VariantGetPtrKeyedGetter = cgo_VariantGetPtrKeyedGetter
+	api.FFI.VariantGetPtrKeyedChecker = cgo_VariantGetPtrKeyedChecker
+	api.FFI.VariantGetConstantValue = cgo_VariantGetConstantValue
+	api.FFI.VariantGetPtrUtilityFunction = cgo_VariantGetPtrUtilityFunction
+	api.FFI.StringNewWithLatin1Chars = cgo_StringNewWithLatin1Chars
+	api.FFI.StringNewWithUtf8Chars = cgo_StringNewWithUtf8Chars
+	api.FFI.StringNewWithUtf16Chars = cgo_StringNewWithUtf16Chars
+	api.FFI.StringNewWithUtf32Chars = cgo_StringNewWithUtf32Chars
+	api.FFI.StringNewWithWideChars = cgo_StringNewWithWideChars
+	api.FFI.StringNewWithLatin1CharsAndLen = cgo_StringNewWithLatin1CharsAndLen
+	api.FFI.StringNewWithUtf8CharsAndLen = cgo_StringNewWithUtf8CharsAndLen
+	api.FFI.StringNewWithUtf8CharsAndLen2 = cgo_StringNewWithUtf8CharsAndLen2
+	api.FFI.StringNewWithUtf16CharsAndLen = cgo_StringNewWithUtf16CharsAndLen
+	api.FFI.StringNewWithUtf16CharsAndLen2 = cgo_StringNewWithUtf16CharsAndLen2
+	api.FFI.StringNewWithUtf32CharsAndLen = cgo_StringNewWithUtf32CharsAndLen
+	api.FFI.StringNewWithWideCharsAndLen = cgo_StringNewWithWideCharsAndLen
+	api.FFI.StringToLatin1Chars = cgo_StringToLatin1Chars
+	api.FFI.StringToUtf8Chars = cgo_StringToUtf8Chars
+	api.FFI.StringToUtf16Chars = cgo_StringToUtf16Chars
+	api.FFI.StringToUtf32Chars = cgo_StringToUtf32Chars
+	api.FFI.StringToWideChars = cgo_StringToWideChars
+	api.FFI.StringOperatorIndex = cgo_StringOperatorIndex
+	api.FFI.StringOperatorIndexConst = cgo_StringOperatorIndexConst
+	api.FFI.StringOperatorPlusEqString = cgo_StringOperatorPlusEqString
+	api.FFI.StringOperatorPlusEqChar = cgo_StringOperatorPlusEqChar
+	api.FFI.StringOperatorPlusEqCstr = cgo_StringOperatorPlusEqCstr
+	api.FFI.StringOperatorPlusEqWcstr = cgo_StringOperatorPlusEqWcstr
+	api.FFI.StringOperatorPlusEqC32str = cgo_StringOperatorPlusEqC32str
+	api.FFI.StringResize = cgo_StringResize
+	api.FFI.StringNameNewWithLatin1Chars = cgo_StringNameNewWithLatin1Chars
+	api.FFI.StringNameNewWithUtf8Chars = cgo_StringNameNewWithUtf8Chars
+	api.FFI.StringNameNewWithUtf8CharsAndLen = cgo_StringNameNewWithUtf8CharsAndLen
+	api.FFI.XmlParserOpenBuffer = cgo_XmlParserOpenBuffer
+	api.FFI.FileAccessStoreBuffer = cgo_FileAccessStoreBuffer
+	api.FFI.FileAccessGetBuffer = cgo_FileAccessGetBuffer
+	api.FFI.ImagePtrw = cgo_ImagePtrw
+	api.FFI.ImagePtr = cgo_ImagePtr
+	api.FFI.WorkerThreadPoolAddNativeGroupTask = cgo_WorkerThreadPoolAddNativeGroupTask
+	api.FFI.WorkerThreadPoolAddNativeTask = cgo_WorkerThreadPoolAddNativeTask
+	api.FFI.PackedByteArrayOperatorIndex = cgo_PackedByteArrayOperatorIndex
+	api.FFI.PackedByteArrayOperatorIndexConst = cgo_PackedByteArrayOperatorIndexConst
+	api.FFI.PackedFloat32ArrayOperatorIndex = cgo_PackedFloat32ArrayOperatorIndex
+	api.FFI.PackedFloat32ArrayOperatorIndexConst = cgo_PackedFloat32ArrayOperatorIndexConst
+	api.FFI.PackedFloat64ArrayOperatorIndex = cgo_PackedFloat64ArrayOperatorIndex
+	api.FFI.PackedFloat64ArrayOperatorIndexConst = cgo_PackedFloat64ArrayOperatorIndexConst
+	api.FFI.PackedInt32ArrayOperatorIndex = cgo_PackedInt32ArrayOperatorIndex
+	api.FFI.PackedInt32ArrayOperatorIndexConst = cgo_PackedInt32ArrayOperatorIndexConst
+	api.FFI.PackedInt64ArrayOperatorIndex = cgo_PackedInt64ArrayOperatorIndex
+	api.FFI.PackedInt64ArrayOperatorIndexConst = cgo_PackedInt64ArrayOperatorIndexConst
+	api.FFI.PackedStringArrayOperatorIndex = cgo_PackedStringArrayOperatorIndex
+	api.FFI.PackedStringArrayOperatorIndexConst = cgo_PackedStringArrayOperatorIndexConst
+	api.FFI.PackedVector2ArrayOperatorIndex = cgo_PackedVector2ArrayOperatorIndex
+	api.FFI.PackedVector2ArrayOperatorIndexConst = cgo_PackedVector2ArrayOperatorIndexConst
+	api.FFI.PackedVector3ArrayOperatorIndex = cgo_PackedVector3ArrayOperatorIndex
+	api.FFI.PackedVector3ArrayOperatorIndexConst = cgo_PackedVector3ArrayOperatorIndexConst
+	api.FFI.PackedVector4ArrayOperatorIndex = cgo_PackedVector4ArrayOperatorIndex
+	api.FFI.PackedVector4ArrayOperatorIndexConst = cgo_PackedVector4ArrayOperatorIndexConst
+	api.FFI.PackedColorArrayOperatorIndex = cgo_PackedColorArrayOperatorIndex
+	api.FFI.PackedColorArrayOperatorIndexConst = cgo_PackedColorArrayOperatorIndexConst
+	api.FFI.ArrayOperatorIndex = cgo_ArrayOperatorIndex
+	api.FFI.ArrayOperatorIndexConst = cgo_ArrayOperatorIndexConst
+	api.FFI.ArrayRef = cgo_ArrayRef
+	api.FFI.ArraySetTyped = cgo_ArraySetTyped
+	api.FFI.DictionaryOperatorIndex = cgo_DictionaryOperatorIndex
+	api.FFI.DictionaryOperatorIndexConst = cgo_DictionaryOperatorIndexConst
+	api.FFI.ObjectMethodBindCall = cgo_ObjectMethodBindCall
+	api.FFI.ObjectMethodBindPtrcall = cgo_ObjectMethodBindPtrcall
+	api.FFI.ObjectDestroy = cgo_ObjectDestroy
+	api.FFI.GlobalGetSingleton = cgo_GlobalGetSingleton
+	api.FFI.ObjectGetInstanceBinding = cgo_ObjectGetInstanceBinding
+	api.FFI.ObjectSetInstanceBinding = cgo_ObjectSetInstanceBinding
+	api.FFI.ObjectFreeInstanceBinding = cgo_ObjectFreeInstanceBinding
+	api.FFI.ObjectSetInstance = cgo_ObjectSetInstance
+	api.FFI.ObjectGetClassName = cgo_ObjectGetClassName
+	api.FFI.ObjectCastTo = cgo_ObjectCastTo
+	api.FFI.ObjectGetInstanceFromId = cgo_ObjectGetInstanceFromId
+	api.FFI.ObjectGetInstanceId = cgo_ObjectGetInstanceId
+	api.FFI.ObjectHasScriptMethod = cgo_ObjectHasScriptMethod
+	api.FFI.ObjectCallScriptMethod = cgo_ObjectCallScriptMethod
+	api.FFI.RefGetObject = cgo_RefGetObject
+	api.FFI.RefSetObject = cgo_RefSetObject
+	api.FFI.ScriptInstanceCreate = cgo_ScriptInstanceCreate
+	api.FFI.ScriptInstanceCreate2 = cgo_ScriptInstanceCreate2
+	api.FFI.ScriptInstanceCreate3 = cgo_ScriptInstanceCreate3
+	api.FFI.PlaceHolderScriptInstanceCreate = cgo_PlaceHolderScriptInstanceCreate
+	api.FFI.PlaceHolderScriptInstanceUpdate = cgo_PlaceHolderScriptInstanceUpdate
+	api.FFI.ObjectGetScriptInstance = cgo_ObjectGetScriptInstance
+	api.FFI.CallableCustomCreate = cgo_CallableCustomCreate
+	api.FFI.CallableCustomCreate2 = cgo_CallableCustomCreate2
+	api.FFI.CallableCustomGetUserData = cgo_CallableCustomGetUserData
+	api.FFI.ClassdbConstructObject = cgo_ClassdbConstructObject
+	api.FFI.ClassdbGetMethodBind = cgo_ClassdbGetMethodBind
+	api.FFI.ClassdbGetClassTag = cgo_ClassdbGetClassTag
+	api.FFI.ClassdbRegisterExtensionClass = cgo_ClassdbRegisterExtensionClass
+	api.FFI.ClassdbRegisterExtensionClass2 = cgo_ClassdbRegisterExtensionClass2
+	api.FFI.ClassdbRegisterExtensionClass3 = cgo_ClassdbRegisterExtensionClass3
+	api.FFI.ClassdbRegisterExtensionClassMethod = cgo_ClassdbRegisterExtensionClassMethod
+	api.FFI.ClassdbRegisterExtensionClassVirtualMethod = cgo_ClassdbRegisterExtensionClassVirtualMethod
+	api.FFI.ClassdbRegisterExtensionClassIntegerConstant = cgo_ClassdbRegisterExtensionClassIntegerConstant
+	api.FFI.ClassdbRegisterExtensionClassProperty = cgo_ClassdbRegisterExtensionClassProperty
+	api.FFI.ClassdbRegisterExtensionClassPropertyIndexed = cgo_ClassdbRegisterExtensionClassPropertyIndexed
+	api.FFI.ClassdbRegisterExtensionClassPropertyGroup = cgo_ClassdbRegisterExtensionClassPropertyGroup
+	api.FFI.ClassdbRegisterExtensionClassPropertySubgroup = cgo_ClassdbRegisterExtensionClassPropertySubgroup
+	api.FFI.ClassdbRegisterExtensionClassSignal = cgo_ClassdbRegisterExtensionClassSignal
+	api.FFI.ClassdbUnregisterExtensionClass = cgo_ClassdbUnregisterExtensionClass
+	api.FFI.GetLibraryPath = cgo_GetLibraryPath
+	api.FFI.EditorAddPlugin = cgo_EditorAddPlugin
+	api.FFI.EditorRemovePlugin = cgo_EditorRemovePlugin
+}
+func cgo_GetProcAddress(p_function_name string) unsafe.Pointer {
+	arg0 := (C.GDExtensionInterfaceGetProcAddress)(capi.GetProcAddress)
+	arg1 := C.CString(p_function_name)
+	__retValue := C.cgo_GDExtensionInterfaceGetProcAddress(arg0, arg1)
+	return (unsafe.Pointer)(__retValue)
+}
+func cgo_GetGodotVersion(r_godot_version unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceGetGodotVersion)(capi.GetGodotVersion)
+	arg1 := (*C.GDExtensionGodotVersion)(r_godot_version)
+	C.cgo_GDExtensionInterfaceGetGodotVersion(arg0, arg1)
+
+}
+func cgo_MemAlloc(p_bytes int64) unsafe.Pointer {
+	arg0 := (C.GDExtensionInterfaceMemAlloc)(capi.MemAlloc)
+	arg1 := (C.size_t)(p_bytes)
+	__retValue := C.cgo_GDExtensionInterfaceMemAlloc(arg0, arg1)
+	return (unsafe.Pointer)(__retValue)
+}
+func cgo_MemRealloc(p_ptr unsafe.Pointer, p_bytes int64) unsafe.Pointer {
+	arg0 := (C.GDExtensionInterfaceMemRealloc)(capi.MemRealloc)
+	arg1 := unsafe.Pointer(p_ptr)
+	arg2 := (C.size_t)(p_bytes)
+	__retValue := C.cgo_GDExtensionInterfaceMemRealloc(arg0, arg1, arg2)
+	return (unsafe.Pointer)(__retValue)
+}
+func cgo_MemFree(p_ptr unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceMemFree)(capi.MemFree)
+	arg1 := unsafe.Pointer(p_ptr)
+	C.cgo_GDExtensionInterfaceMemFree(arg0, arg1)
+
+}
+func cgo_PrintError(p_description string, p_function string, p_file string, p_line int32, p_editor_notify bool) {
+	arg0 := (C.GDExtensionInterfacePrintError)(capi.PrintError)
+	arg1 := C.CString(p_description)
+	arg2 := C.CString(p_function)
+	arg3 := C.CString(p_file)
+	arg4 := (C.int32_t)(p_line)
+	arg5 := ToGdBool(p_editor_notify)
+	C.cgo_GDExtensionInterfacePrintError(arg0, arg1, arg2, arg3, arg4, arg5)
+
+}
+func cgo_PrintErrorWithMessage(p_description string, p_message string, p_function string, p_file string, p_line int32, p_editor_notify bool) {
+	arg0 := (C.GDExtensionInterfacePrintErrorWithMessage)(capi.PrintErrorWithMessage)
+	arg1 := C.CString(p_description)
+	arg2 := C.CString(p_message)
+	arg3 := C.CString(p_function)
+	arg4 := C.CString(p_file)
+	arg5 := (C.int32_t)(p_line)
+	arg6 := ToGdBool(p_editor_notify)
+	C.cgo_GDExtensionInterfacePrintErrorWithMessage(arg0, arg1, arg2, arg3, arg4, arg5, arg6)
+
+}
+func cgo_PrintWarning(p_description string, p_function string, p_file string, p_line int32, p_editor_notify bool) {
+	arg0 := (C.GDExtensionInterfacePrintWarning)(capi.PrintWarning)
+	arg1 := C.CString(p_description)
+	arg2 := C.CString(p_function)
+	arg3 := C.CString(p_file)
+	arg4 := (C.int32_t)(p_line)
+	arg5 := ToGdBool(p_editor_notify)
+	C.cgo_GDExtensionInterfacePrintWarning(arg0, arg1, arg2, arg3, arg4, arg5)
+
+}
+func cgo_PrintWarningWithMessage(p_description string, p_message string, p_function string, p_file string, p_line int32, p_editor_notify bool) {
+	arg0 := (C.GDExtensionInterfacePrintWarningWithMessage)(capi.PrintWarningWithMessage)
+	arg1 := C.CString(p_description)
+	arg2 := C.CString(p_message)
+	arg3 := C.CString(p_function)
+	arg4 := C.CString(p_file)
+	arg5 := (C.int32_t)(p_line)
+	arg6 := ToGdBool(p_editor_notify)
+	C.cgo_GDExtensionInterfacePrintWarningWithMessage(arg0, arg1, arg2, arg3, arg4, arg5, arg6)
+
+}
+func cgo_PrintScriptError(p_description string, p_function string, p_file string, p_line int32, p_editor_notify bool) {
+	arg0 := (C.GDExtensionInterfacePrintScriptError)(capi.PrintScriptError)
+	arg1 := C.CString(p_description)
+	arg2 := C.CString(p_function)
+	arg3 := C.CString(p_file)
+	arg4 := (C.int32_t)(p_line)
+	arg5 := ToGdBool(p_editor_notify)
+	C.cgo_GDExtensionInterfacePrintScriptError(arg0, arg1, arg2, arg3, arg4, arg5)
+
+}
+func cgo_PrintScriptErrorWithMessage(p_description string, p_message string, p_function string, p_file string, p_line int32, p_editor_notify bool) {
+	arg0 := (C.GDExtensionInterfacePrintScriptErrorWithMessage)(capi.PrintScriptErrorWithMessage)
+	arg1 := C.CString(p_description)
+	arg2 := C.CString(p_message)
+	arg3 := C.CString(p_function)
+	arg4 := C.CString(p_file)
+	arg5 := (C.int32_t)(p_line)
+	arg6 := ToGdBool(p_editor_notify)
+	C.cgo_GDExtensionInterfacePrintScriptErrorWithMessage(arg0, arg1, arg2, arg3, arg4, arg5, arg6)
+
+}
+func cgo_GetNativeStructSize(p_name unsafe.Pointer) uint64 {
+	arg0 := (C.GDExtensionInterfaceGetNativeStructSize)(capi.GetNativeStructSize)
+	arg1 := (C.GDExtensionConstStringNamePtr)(p_name)
+	__retValue := C.cgo_GDExtensionInterfaceGetNativeStructSize(arg0, arg1)
+	return (uint64)(__retValue)
+}
+func cgo_VariantNewCopy(r_dest unsafe.Pointer, p_src unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceVariantNewCopy)(capi.VariantNewCopy)
+	arg1 := (C.GDExtensionUninitializedVariantPtr)(r_dest)
+	arg2 := (C.GDExtensionConstVariantPtr)(p_src)
+	C.cgo_GDExtensionInterfaceVariantNewCopy(arg0, arg1, arg2)
+
+}
+func cgo_VariantNewNil(r_dest unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceVariantNewNil)(capi.VariantNewNil)
+	arg1 := (C.GDExtensionUninitializedVariantPtr)(r_dest)
+	C.cgo_GDExtensionInterfaceVariantNewNil(arg0, arg1)
+
+}
+func cgo_VariantDestroy(p_self unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceVariantDestroy)(capi.VariantDestroy)
+	arg1 := (C.GDExtensionVariantPtr)(p_self)
+	C.cgo_GDExtensionInterfaceVariantDestroy(arg0, arg1)
+
+}
+func cgo_VariantCall(p_self unsafe.Pointer, p_method unsafe.Pointer, p_args unsafe.Pointer, p_argument_count int64, r_return unsafe.Pointer, r_error unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceVariantCall)(capi.VariantCall)
+	arg1 := (C.GDExtensionVariantPtr)(p_self)
+	arg2 := (C.GDExtensionConstStringNamePtr)(p_method)
+	arg3 := (*C.GDExtensionConstVariantPtr)(p_args)
+	arg4 := (C.GDExtensionInt)(p_argument_count)
+	arg5 := (C.GDExtensionUninitializedVariantPtr)(r_return)
+	arg6 := (*C.GDExtensionCallError)(r_error)
+	C.cgo_GDExtensionInterfaceVariantCall(arg0, arg1, arg2, arg3, arg4, arg5, arg6)
+
+}
+func cgo_VariantCallStatic(p_type uint32 /*VariantType*/, p_method unsafe.Pointer, p_args unsafe.Pointer, p_argument_count int64, r_return unsafe.Pointer, r_error unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceVariantCallStatic)(capi.VariantCallStatic)
+	arg1 := (C.GDExtensionVariantType)(p_type)
+	arg2 := (C.GDExtensionConstStringNamePtr)(p_method)
+	arg3 := (*C.GDExtensionConstVariantPtr)(p_args)
+	arg4 := (C.GDExtensionInt)(p_argument_count)
+	arg5 := (C.GDExtensionUninitializedVariantPtr)(r_return)
+	arg6 := (*C.GDExtensionCallError)(r_error)
+	C.cgo_GDExtensionInterfaceVariantCallStatic(arg0, arg1, arg2, arg3, arg4, arg5, arg6)
+
+}
+func cgo_VariantEvaluate(p_op uint32 /*VariantOperator*/, p_a unsafe.Pointer, p_b unsafe.Pointer, r_return unsafe.Pointer, r_valid unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceVariantEvaluate)(capi.VariantEvaluate)
+	arg1 := (C.GDExtensionVariantOperator)(p_op)
+	arg2 := (C.GDExtensionConstVariantPtr)(p_a)
+	arg3 := (C.GDExtensionConstVariantPtr)(p_b)
+	arg4 := (C.GDExtensionUninitializedVariantPtr)(r_return)
+	arg5 := (*C.GDExtensionBool)(r_valid)
+	C.cgo_GDExtensionInterfaceVariantEvaluate(arg0, arg1, arg2, arg3, arg4, arg5)
+
+}
+func cgo_VariantSet(p_self unsafe.Pointer, p_key unsafe.Pointer, p_value unsafe.Pointer, r_valid unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceVariantSet)(capi.VariantSet)
+	arg1 := (C.GDExtensionVariantPtr)(p_self)
+	arg2 := (C.GDExtensionConstVariantPtr)(p_key)
+	arg3 := (C.GDExtensionConstVariantPtr)(p_value)
+	arg4 := (*C.GDExtensionBool)(r_valid)
+	C.cgo_GDExtensionInterfaceVariantSet(arg0, arg1, arg2, arg3, arg4)
+
+}
+func cgo_VariantSetNamed(p_self unsafe.Pointer, p_key unsafe.Pointer, p_value unsafe.Pointer, r_valid unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceVariantSetNamed)(capi.VariantSetNamed)
+	arg1 := (C.GDExtensionVariantPtr)(p_self)
+	arg2 := (C.GDExtensionConstStringNamePtr)(p_key)
+	arg3 := (C.GDExtensionConstVariantPtr)(p_value)
+	arg4 := (*C.GDExtensionBool)(r_valid)
+	C.cgo_GDExtensionInterfaceVariantSetNamed(arg0, arg1, arg2, arg3, arg4)
+
+}
+func cgo_VariantSetKeyed(p_self unsafe.Pointer, p_key unsafe.Pointer, p_value unsafe.Pointer, r_valid unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceVariantSetKeyed)(capi.VariantSetKeyed)
+	arg1 := (C.GDExtensionVariantPtr)(p_self)
+	arg2 := (C.GDExtensionConstVariantPtr)(p_key)
+	arg3 := (C.GDExtensionConstVariantPtr)(p_value)
+	arg4 := (*C.GDExtensionBool)(r_valid)
+	C.cgo_GDExtensionInterfaceVariantSetKeyed(arg0, arg1, arg2, arg3, arg4)
+
+}
+func cgo_VariantSetIndexed(p_self unsafe.Pointer, p_index int64, p_value unsafe.Pointer, r_valid unsafe.Pointer, r_oob unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceVariantSetIndexed)(capi.VariantSetIndexed)
+	arg1 := (C.GDExtensionVariantPtr)(p_self)
+	arg2 := (C.GDExtensionInt)(p_index)
+	arg3 := (C.GDExtensionConstVariantPtr)(p_value)
+	arg4 := (*C.GDExtensionBool)(r_valid)
+	arg5 := (*C.GDExtensionBool)(r_oob)
+	C.cgo_GDExtensionInterfaceVariantSetIndexed(arg0, arg1, arg2, arg3, arg4, arg5)
+
+}
+func cgo_VariantGet(p_self unsafe.Pointer, p_key unsafe.Pointer, r_ret unsafe.Pointer, r_valid unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceVariantGet)(capi.VariantGet)
+	arg1 := (C.GDExtensionConstVariantPtr)(p_self)
+	arg2 := (C.GDExtensionConstVariantPtr)(p_key)
+	arg3 := (C.GDExtensionUninitializedVariantPtr)(r_ret)
+	arg4 := (*C.GDExtensionBool)(r_valid)
+	C.cgo_GDExtensionInterfaceVariantGet(arg0, arg1, arg2, arg3, arg4)
+
+}
+func cgo_VariantGetNamed(p_self unsafe.Pointer, p_key unsafe.Pointer, r_ret unsafe.Pointer, r_valid unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceVariantGetNamed)(capi.VariantGetNamed)
+	arg1 := (C.GDExtensionConstVariantPtr)(p_self)
+	arg2 := (C.GDExtensionConstStringNamePtr)(p_key)
+	arg3 := (C.GDExtensionUninitializedVariantPtr)(r_ret)
+	arg4 := (*C.GDExtensionBool)(r_valid)
+	C.cgo_GDExtensionInterfaceVariantGetNamed(arg0, arg1, arg2, arg3, arg4)
+
+}
+func cgo_VariantGetKeyed(p_self unsafe.Pointer, p_key unsafe.Pointer, r_ret unsafe.Pointer, r_valid unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceVariantGetKeyed)(capi.VariantGetKeyed)
+	arg1 := (C.GDExtensionConstVariantPtr)(p_self)
+	arg2 := (C.GDExtensionConstVariantPtr)(p_key)
+	arg3 := (C.GDExtensionUninitializedVariantPtr)(r_ret)
+	arg4 := (*C.GDExtensionBool)(r_valid)
+	C.cgo_GDExtensionInterfaceVariantGetKeyed(arg0, arg1, arg2, arg3, arg4)
+
+}
+func cgo_VariantGetIndexed(p_self unsafe.Pointer, p_index int64, r_ret unsafe.Pointer, r_valid unsafe.Pointer, r_oob unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceVariantGetIndexed)(capi.VariantGetIndexed)
+	arg1 := (C.GDExtensionConstVariantPtr)(p_self)
+	arg2 := (C.GDExtensionInt)(p_index)
+	arg3 := (C.GDExtensionUninitializedVariantPtr)(r_ret)
+	arg4 := (*C.GDExtensionBool)(r_valid)
+	arg5 := (*C.GDExtensionBool)(r_oob)
+	C.cgo_GDExtensionInterfaceVariantGetIndexed(arg0, arg1, arg2, arg3, arg4, arg5)
+
+}
+func cgo_VariantIterInit(p_self unsafe.Pointer, r_iter unsafe.Pointer, r_valid unsafe.Pointer) bool {
+	arg0 := (C.GDExtensionInterfaceVariantIterInit)(capi.VariantIterInit)
+	arg1 := (C.GDExtensionConstVariantPtr)(p_self)
+	arg2 := (C.GDExtensionUninitializedVariantPtr)(r_iter)
+	arg3 := (*C.GDExtensionBool)(r_valid)
+	__retValue := C.cgo_GDExtensionInterfaceVariantIterInit(arg0, arg1, arg2, arg3)
+	return __retValue != 0
+}
+func cgo_VariantIterNext(p_self unsafe.Pointer, r_iter unsafe.Pointer, r_valid unsafe.Pointer) bool {
+	arg0 := (C.GDExtensionInterfaceVariantIterNext)(capi.VariantIterNext)
+	arg1 := (C.GDExtensionConstVariantPtr)(p_self)
+	arg2 := (C.GDExtensionVariantPtr)(r_iter)
+	arg3 := (*C.GDExtensionBool)(r_valid)
+	__retValue := C.cgo_GDExtensionInterfaceVariantIterNext(arg0, arg1, arg2, arg3)
+	return __retValue != 0
+}
+func cgo_VariantIterGet(p_self unsafe.Pointer, r_iter unsafe.Pointer, r_ret unsafe.Pointer, r_valid unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceVariantIterGet)(capi.VariantIterGet)
+	arg1 := (C.GDExtensionConstVariantPtr)(p_self)
+	arg2 := (C.GDExtensionVariantPtr)(r_iter)
+	arg3 := (C.GDExtensionUninitializedVariantPtr)(r_ret)
+	arg4 := (*C.GDExtensionBool)(r_valid)
+	C.cgo_GDExtensionInterfaceVariantIterGet(arg0, arg1, arg2, arg3, arg4)
+
+}
+func cgo_VariantHash(p_self unsafe.Pointer) int64 {
+	arg0 := (C.GDExtensionInterfaceVariantHash)(capi.VariantHash)
+	arg1 := (C.GDExtensionConstVariantPtr)(p_self)
+	__retValue := C.cgo_GDExtensionInterfaceVariantHash(arg0, arg1)
+	return (int64)(__retValue)
+}
+func cgo_VariantRecursiveHash(p_self unsafe.Pointer, p_recursion_count int64) int64 {
+	arg0 := (C.GDExtensionInterfaceVariantRecursiveHash)(capi.VariantRecursiveHash)
+	arg1 := (C.GDExtensionConstVariantPtr)(p_self)
+	arg2 := (C.GDExtensionInt)(p_recursion_count)
+	__retValue := C.cgo_GDExtensionInterfaceVariantRecursiveHash(arg0, arg1, arg2)
+	return (int64)(__retValue)
+}
+func cgo_VariantHashCompare(p_self unsafe.Pointer, p_other unsafe.Pointer) bool {
+	arg0 := (C.GDExtensionInterfaceVariantHashCompare)(capi.VariantHashCompare)
+	arg1 := (C.GDExtensionConstVariantPtr)(p_self)
+	arg2 := (C.GDExtensionConstVariantPtr)(p_other)
+	__retValue := C.cgo_GDExtensionInterfaceVariantHashCompare(arg0, arg1, arg2)
+	return __retValue != 0
+}
+func cgo_VariantBooleanize(p_self unsafe.Pointer) bool {
+	arg0 := (C.GDExtensionInterfaceVariantBooleanize)(capi.VariantBooleanize)
+	arg1 := (C.GDExtensionConstVariantPtr)(p_self)
+	__retValue := C.cgo_GDExtensionInterfaceVariantBooleanize(arg0, arg1)
+	return __retValue != 0
+}
+func cgo_VariantDuplicate(p_self unsafe.Pointer, r_ret unsafe.Pointer, p_deep bool) {
+	arg0 := (C.GDExtensionInterfaceVariantDuplicate)(capi.VariantDuplicate)
+	arg1 := (C.GDExtensionConstVariantPtr)(p_self)
+	arg2 := (C.GDExtensionVariantPtr)(r_ret)
+	arg3 := ToGdBool(p_deep)
+	C.cgo_GDExtensionInterfaceVariantDuplicate(arg0, arg1, arg2, arg3)
+
+}
+func cgo_VariantStringify(p_self unsafe.Pointer, r_ret unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceVariantStringify)(capi.VariantStringify)
+	arg1 := (C.GDExtensionConstVariantPtr)(p_self)
+	arg2 := (C.GDExtensionStringPtr)(r_ret)
+	C.cgo_GDExtensionInterfaceVariantStringify(arg0, arg1, arg2)
+
+}
+func cgo_VariantGetType(p_self unsafe.Pointer) uint32 /*VariantType*/ {
+	arg0 := (C.GDExtensionInterfaceVariantGetType)(capi.VariantGetType)
+	arg1 := (C.GDExtensionConstVariantPtr)(p_self)
+	__retValue := C.cgo_GDExtensionInterfaceVariantGetType(arg0, arg1)
+	return (uint32 /*VariantType*/)(__retValue)
+}
+func cgo_VariantHasMethod(p_self unsafe.Pointer, p_method unsafe.Pointer) bool {
+	arg0 := (C.GDExtensionInterfaceVariantHasMethod)(capi.VariantHasMethod)
+	arg1 := (C.GDExtensionConstVariantPtr)(p_self)
+	arg2 := (C.GDExtensionConstStringNamePtr)(p_method)
+	__retValue := C.cgo_GDExtensionInterfaceVariantHasMethod(arg0, arg1, arg2)
+	return __retValue != 0
+}
+func cgo_VariantHasMember(p_type uint32 /*VariantType*/, p_member unsafe.Pointer) bool {
+	arg0 := (C.GDExtensionInterfaceVariantHasMember)(capi.VariantHasMember)
+	arg1 := (C.GDExtensionVariantType)(p_type)
+	arg2 := (C.GDExtensionConstStringNamePtr)(p_member)
+	__retValue := C.cgo_GDExtensionInterfaceVariantHasMember(arg0, arg1, arg2)
+	return __retValue != 0
+}
+func cgo_VariantHasKey(p_self unsafe.Pointer, p_key unsafe.Pointer, r_valid unsafe.Pointer) bool {
+	arg0 := (C.GDExtensionInterfaceVariantHasKey)(capi.VariantHasKey)
+	arg1 := (C.GDExtensionConstVariantPtr)(p_self)
+	arg2 := (C.GDExtensionConstVariantPtr)(p_key)
+	arg3 := (*C.GDExtensionBool)(r_valid)
+	__retValue := C.cgo_GDExtensionInterfaceVariantHasKey(arg0, arg1, arg2, arg3)
+	return __retValue != 0
+}
+func cgo_VariantGetTypeName(p_type uint32 /*VariantType*/, r_name unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceVariantGetTypeName)(capi.VariantGetTypeName)
+	arg1 := (C.GDExtensionVariantType)(p_type)
+	arg2 := (C.GDExtensionUninitializedStringPtr)(r_name)
+	C.cgo_GDExtensionInterfaceVariantGetTypeName(arg0, arg1, arg2)
+
+}
+func cgo_VariantCanConvert(p_from uint32 /*VariantType*/, p_to uint32 /*VariantType*/) bool {
+	arg0 := (C.GDExtensionInterfaceVariantCanConvert)(capi.VariantCanConvert)
+	arg1 := (C.GDExtensionVariantType)(p_from)
+	arg2 := (C.GDExtensionVariantType)(p_to)
+	__retValue := C.cgo_GDExtensionInterfaceVariantCanConvert(arg0, arg1, arg2)
+	return __retValue != 0
+}
+func cgo_VariantCanConvertStrict(p_from uint32 /*VariantType*/, p_to uint32 /*VariantType*/) bool {
+	arg0 := (C.GDExtensionInterfaceVariantCanConvertStrict)(capi.VariantCanConvertStrict)
+	arg1 := (C.GDExtensionVariantType)(p_from)
+	arg2 := (C.GDExtensionVariantType)(p_to)
+	__retValue := C.cgo_GDExtensionInterfaceVariantCanConvertStrict(arg0, arg1, arg2)
+	return __retValue != 0
+}
+func cgo_GetVariantFromTypeConstructor(p_type uint32 /*VariantType*/) GDExtensionVariantFromTypeConstructorFunc {
+	arg0 := (C.GDExtensionInterfaceGetVariantFromTypeConstructor)(capi.GetVariantFromTypeConstructor)
+	arg1 := (C.GDExtensionVariantType)(p_type)
+	__retValue := C.cgo_GDExtensionInterfaceGetVariantFromTypeConstructor(arg0, arg1)
+	return (GDExtensionVariantFromTypeConstructorFunc)(__retValue)
+}
+func cgo_GetVariantToTypeConstructor(p_type uint32 /*VariantType*/) GDExtensionTypeFromVariantConstructorFunc {
+	arg0 := (C.GDExtensionInterfaceGetVariantToTypeConstructor)(capi.GetVariantToTypeConstructor)
+	arg1 := (C.GDExtensionVariantType)(p_type)
+	__retValue := C.cgo_GDExtensionInterfaceGetVariantToTypeConstructor(arg0, arg1)
+	return (GDExtensionTypeFromVariantConstructorFunc)(__retValue)
+}
+func cgo_VariantGetPtrOperatorEvaluator(p_operator uint32 /*VariantOperator*/, p_type_a uint32 /*VariantType*/, p_type_b uint32 /*VariantType*/) GDExtensionPtrOperatorEvaluator {
+	arg0 := (C.GDExtensionInterfaceVariantGetPtrOperatorEvaluator)(capi.VariantGetPtrOperatorEvaluator)
+	arg1 := (C.GDExtensionVariantOperator)(p_operator)
+	arg2 := (C.GDExtensionVariantType)(p_type_a)
+	arg3 := (C.GDExtensionVariantType)(p_type_b)
+	__retValue := C.cgo_GDExtensionInterfaceVariantGetPtrOperatorEvaluator(arg0, arg1, arg2, arg3)
+	return (GDExtensionPtrOperatorEvaluator)(__retValue)
+}
+func cgo_VariantGetPtrBuiltinMethod(p_type uint32 /*VariantType*/, p_method unsafe.Pointer, p_hash int64) GDExtensionPtrBuiltInMethod {
+	arg0 := (C.GDExtensionInterfaceVariantGetPtrBuiltinMethod)(capi.VariantGetPtrBuiltinMethod)
+	arg1 := (C.GDExtensionVariantType)(p_type)
+	arg2 := (C.GDExtensionConstStringNamePtr)(p_method)
+	arg3 := (C.GDExtensionInt)(p_hash)
+	__retValue := C.cgo_GDExtensionInterfaceVariantGetPtrBuiltinMethod(arg0, arg1, arg2, arg3)
+	return (GDExtensionPtrBuiltInMethod)(__retValue)
+}
+func cgo_VariantGetPtrConstructor(p_type uint32 /*VariantType*/, p_constructor int32) GDExtensionPtrConstructor {
+	arg0 := (C.GDExtensionInterfaceVariantGetPtrConstructor)(capi.VariantGetPtrConstructor)
+	arg1 := (C.GDExtensionVariantType)(p_type)
+	arg2 := (C.int32_t)(p_constructor)
+	__retValue := C.cgo_GDExtensionInterfaceVariantGetPtrConstructor(arg0, arg1, arg2)
+	return (GDExtensionPtrConstructor)(__retValue)
+}
+func cgo_VariantGetPtrDestructor(p_type uint32 /*VariantType*/) GDExtensionPtrDestructor {
+	arg0 := (C.GDExtensionInterfaceVariantGetPtrDestructor)(capi.VariantGetPtrDestructor)
+	arg1 := (C.GDExtensionVariantType)(p_type)
+	__retValue := C.cgo_GDExtensionInterfaceVariantGetPtrDestructor(arg0, arg1)
+	return (GDExtensionPtrDestructor)(__retValue)
+}
+func cgo_VariantConstruct(p_type uint32 /*VariantType*/, r_base unsafe.Pointer, p_args unsafe.Pointer, p_argument_count int32, r_error unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceVariantConstruct)(capi.VariantConstruct)
+	arg1 := (C.GDExtensionVariantType)(p_type)
+	arg2 := (C.GDExtensionUninitializedVariantPtr)(r_base)
+	arg3 := (*C.GDExtensionConstVariantPtr)(p_args)
+	arg4 := (C.int32_t)(p_argument_count)
+	arg5 := (*C.GDExtensionCallError)(r_error)
+	C.cgo_GDExtensionInterfaceVariantConstruct(arg0, arg1, arg2, arg3, arg4, arg5)
+
+}
+func cgo_VariantGetPtrSetter(p_type uint32 /*VariantType*/, p_member unsafe.Pointer) GDExtensionPtrSetter {
+	arg0 := (C.GDExtensionInterfaceVariantGetPtrSetter)(capi.VariantGetPtrSetter)
+	arg1 := (C.GDExtensionVariantType)(p_type)
+	arg2 := (C.GDExtensionConstStringNamePtr)(p_member)
+	__retValue := C.cgo_GDExtensionInterfaceVariantGetPtrSetter(arg0, arg1, arg2)
+	return (GDExtensionPtrSetter)(__retValue)
+}
+func cgo_VariantGetPtrGetter(p_type uint32 /*VariantType*/, p_member unsafe.Pointer) GDExtensionPtrGetter {
+	arg0 := (C.GDExtensionInterfaceVariantGetPtrGetter)(capi.VariantGetPtrGetter)
+	arg1 := (C.GDExtensionVariantType)(p_type)
+	arg2 := (C.GDExtensionConstStringNamePtr)(p_member)
+	__retValue := C.cgo_GDExtensionInterfaceVariantGetPtrGetter(arg0, arg1, arg2)
+	return (GDExtensionPtrGetter)(__retValue)
+}
+func cgo_VariantGetPtrIndexedSetter(p_type uint32 /*VariantType*/) GDExtensionPtrIndexedSetter {
+	arg0 := (C.GDExtensionInterfaceVariantGetPtrIndexedSetter)(capi.VariantGetPtrIndexedSetter)
+	arg1 := (C.GDExtensionVariantType)(p_type)
+	__retValue := C.cgo_GDExtensionInterfaceVariantGetPtrIndexedSetter(arg0, arg1)
+	return (GDExtensionPtrIndexedSetter)(__retValue)
+}
+func cgo_VariantGetPtrIndexedGetter(p_type uint32 /*VariantType*/) GDExtensionPtrIndexedGetter {
+	arg0 := (C.GDExtensionInterfaceVariantGetPtrIndexedGetter)(capi.VariantGetPtrIndexedGetter)
+	arg1 := (C.GDExtensionVariantType)(p_type)
+	__retValue := C.cgo_GDExtensionInterfaceVariantGetPtrIndexedGetter(arg0, arg1)
+	return (GDExtensionPtrIndexedGetter)(__retValue)
+}
+func cgo_VariantGetPtrKeyedSetter(p_type uint32 /*VariantType*/) GDExtensionPtrKeyedSetter {
+	arg0 := (C.GDExtensionInterfaceVariantGetPtrKeyedSetter)(capi.VariantGetPtrKeyedSetter)
+	arg1 := (C.GDExtensionVariantType)(p_type)
+	__retValue := C.cgo_GDExtensionInterfaceVariantGetPtrKeyedSetter(arg0, arg1)
+	return (GDExtensionPtrKeyedSetter)(__retValue)
+}
+func cgo_VariantGetPtrKeyedGetter(p_type uint32 /*VariantType*/) GDExtensionPtrKeyedGetter {
+	arg0 := (C.GDExtensionInterfaceVariantGetPtrKeyedGetter)(capi.VariantGetPtrKeyedGetter)
+	arg1 := (C.GDExtensionVariantType)(p_type)
+	__retValue := C.cgo_GDExtensionInterfaceVariantGetPtrKeyedGetter(arg0, arg1)
+	return (GDExtensionPtrKeyedGetter)(__retValue)
+}
+func cgo_VariantGetPtrKeyedChecker(p_type uint32 /*VariantType*/) GDExtensionPtrKeyedChecker {
+	arg0 := (C.GDExtensionInterfaceVariantGetPtrKeyedChecker)(capi.VariantGetPtrKeyedChecker)
+	arg1 := (C.GDExtensionVariantType)(p_type)
+	__retValue := C.cgo_GDExtensionInterfaceVariantGetPtrKeyedChecker(arg0, arg1)
+	return (GDExtensionPtrKeyedChecker)(__retValue)
+}
+func cgo_VariantGetConstantValue(p_type uint32 /*VariantType*/, p_constant unsafe.Pointer, r_ret unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceVariantGetConstantValue)(capi.VariantGetConstantValue)
+	arg1 := (C.GDExtensionVariantType)(p_type)
+	arg2 := (C.GDExtensionConstStringNamePtr)(p_constant)
+	arg3 := (C.GDExtensionUninitializedVariantPtr)(r_ret)
+	C.cgo_GDExtensionInterfaceVariantGetConstantValue(arg0, arg1, arg2, arg3)
+
+}
+func cgo_VariantGetPtrUtilityFunction(p_function unsafe.Pointer, p_hash int64) GDExtensionPtrUtilityFunction {
+	arg0 := (C.GDExtensionInterfaceVariantGetPtrUtilityFunction)(capi.VariantGetPtrUtilityFunction)
+	arg1 := (C.GDExtensionConstStringNamePtr)(p_function)
+	arg2 := (C.GDExtensionInt)(p_hash)
+	__retValue := C.cgo_GDExtensionInterfaceVariantGetPtrUtilityFunction(arg0, arg1, arg2)
+	return (GDExtensionPtrUtilityFunction)(__retValue)
+}
+func cgo_StringNewWithLatin1Chars(r_dest unsafe.Pointer, p_contents string) {
+	arg0 := (C.GDExtensionInterfaceStringNewWithLatin1Chars)(capi.StringNewWithLatin1Chars)
+	arg1 := (C.GDExtensionUninitializedStringPtr)(r_dest)
+	arg2 := C.CString(p_contents)
+	C.cgo_GDExtensionInterfaceStringNewWithLatin1Chars(arg0, arg1, arg2)
+
+}
+func cgo_StringNewWithUtf8Chars(r_dest unsafe.Pointer, p_contents string) {
+	arg0 := (C.GDExtensionInterfaceStringNewWithUtf8Chars)(capi.StringNewWithUtf8Chars)
+	arg1 := (C.GDExtensionUninitializedStringPtr)(r_dest)
+	arg2 := C.CString(p_contents)
+	C.cgo_GDExtensionInterfaceStringNewWithUtf8Chars(arg0, arg1, arg2)
+
+}
+func cgo_StringNewWithUtf16Chars(r_dest unsafe.Pointer, p_contents unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceStringNewWithUtf16Chars)(capi.StringNewWithUtf16Chars)
+	arg1 := (C.GDExtensionUninitializedStringPtr)(r_dest)
+	arg2 := (*C.char16_t)(p_contents)
+	C.cgo_GDExtensionInterfaceStringNewWithUtf16Chars(arg0, arg1, arg2)
+
+}
+func cgo_StringNewWithUtf32Chars(r_dest unsafe.Pointer, p_contents unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceStringNewWithUtf32Chars)(capi.StringNewWithUtf32Chars)
+	arg1 := (C.GDExtensionUninitializedStringPtr)(r_dest)
+	arg2 := (*C.char32_t)(p_contents)
+	C.cgo_GDExtensionInterfaceStringNewWithUtf32Chars(arg0, arg1, arg2)
+
+}
+func cgo_StringNewWithWideChars(r_dest unsafe.Pointer, p_contents unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceStringNewWithWideChars)(capi.StringNewWithWideChars)
+	arg1 := (C.GDExtensionUninitializedStringPtr)(r_dest)
+	arg2 := (*C.wchar_t)(p_contents)
+	C.cgo_GDExtensionInterfaceStringNewWithWideChars(arg0, arg1, arg2)
+
+}
+func cgo_StringNewWithLatin1CharsAndLen(r_dest unsafe.Pointer, p_contents string, p_size int64) {
+	arg0 := (C.GDExtensionInterfaceStringNewWithLatin1CharsAndLen)(capi.StringNewWithLatin1CharsAndLen)
+	arg1 := (C.GDExtensionUninitializedStringPtr)(r_dest)
+	arg2 := C.CString(p_contents)
+	arg3 := (C.GDExtensionInt)(p_size)
+	C.cgo_GDExtensionInterfaceStringNewWithLatin1CharsAndLen(arg0, arg1, arg2, arg3)
+
+}
+func cgo_StringNewWithUtf8CharsAndLen(r_dest unsafe.Pointer, p_contents string, p_size int64) {
+	arg0 := (C.GDExtensionInterfaceStringNewWithUtf8CharsAndLen)(capi.StringNewWithUtf8CharsAndLen)
+	arg1 := (C.GDExtensionUninitializedStringPtr)(r_dest)
+	arg2 := C.CString(p_contents)
+	arg3 := (C.GDExtensionInt)(p_size)
+	C.cgo_GDExtensionInterfaceStringNewWithUtf8CharsAndLen(arg0, arg1, arg2, arg3)
+
+}
+func cgo_StringNewWithUtf8CharsAndLen2(r_dest unsafe.Pointer, p_contents string, p_size int64) int64 {
+	arg0 := (C.GDExtensionInterfaceStringNewWithUtf8CharsAndLen2)(capi.StringNewWithUtf8CharsAndLen2)
+	arg1 := (C.GDExtensionUninitializedStringPtr)(r_dest)
+	arg2 := C.CString(p_contents)
+	arg3 := (C.GDExtensionInt)(p_size)
+	__retValue := C.cgo_GDExtensionInterfaceStringNewWithUtf8CharsAndLen2(arg0, arg1, arg2, arg3)
+	return (int64)(__retValue)
+}
+func cgo_StringNewWithUtf16CharsAndLen(r_dest unsafe.Pointer, p_contents unsafe.Pointer, p_char_count int64) {
+	arg0 := (C.GDExtensionInterfaceStringNewWithUtf16CharsAndLen)(capi.StringNewWithUtf16CharsAndLen)
+	arg1 := (C.GDExtensionUninitializedStringPtr)(r_dest)
+	arg2 := (*C.char16_t)(p_contents)
+	arg3 := (C.GDExtensionInt)(p_char_count)
+	C.cgo_GDExtensionInterfaceStringNewWithUtf16CharsAndLen(arg0, arg1, arg2, arg3)
+
+}
+func cgo_StringNewWithUtf16CharsAndLen2(r_dest unsafe.Pointer, p_contents unsafe.Pointer, p_char_count int64, p_default_little_endian bool) int64 {
+	arg0 := (C.GDExtensionInterfaceStringNewWithUtf16CharsAndLen2)(capi.StringNewWithUtf16CharsAndLen2)
+	arg1 := (C.GDExtensionUninitializedStringPtr)(r_dest)
+	arg2 := (*C.char16_t)(p_contents)
+	arg3 := (C.GDExtensionInt)(p_char_count)
+	arg4 := ToGdBool(p_default_little_endian)
+	__retValue := C.cgo_GDExtensionInterfaceStringNewWithUtf16CharsAndLen2(arg0, arg1, arg2, arg3, arg4)
+	return (int64)(__retValue)
+}
+func cgo_StringNewWithUtf32CharsAndLen(r_dest unsafe.Pointer, p_contents unsafe.Pointer, p_char_count int64) {
+	arg0 := (C.GDExtensionInterfaceStringNewWithUtf32CharsAndLen)(capi.StringNewWithUtf32CharsAndLen)
+	arg1 := (C.GDExtensionUninitializedStringPtr)(r_dest)
+	arg2 := (*C.char32_t)(p_contents)
+	arg3 := (C.GDExtensionInt)(p_char_count)
+	C.cgo_GDExtensionInterfaceStringNewWithUtf32CharsAndLen(arg0, arg1, arg2, arg3)
+
+}
+func cgo_StringNewWithWideCharsAndLen(r_dest unsafe.Pointer, p_contents unsafe.Pointer, p_char_count int64) {
+	arg0 := (C.GDExtensionInterfaceStringNewWithWideCharsAndLen)(capi.StringNewWithWideCharsAndLen)
+	arg1 := (C.GDExtensionUninitializedStringPtr)(r_dest)
+	arg2 := (*C.wchar_t)(p_contents)
+	arg3 := (C.GDExtensionInt)(p_char_count)
+	C.cgo_GDExtensionInterfaceStringNewWithWideCharsAndLen(arg0, arg1, arg2, arg3)
+
+}
+func cgo_StringToLatin1Chars(p_self unsafe.Pointer, r_text unsafe.Pointer, p_max_write_length int64) int64 {
+	arg0 := (C.GDExtensionInterfaceStringToLatin1Chars)(capi.StringToLatin1Chars)
+	arg1 := (C.GDExtensionConstStringPtr)(p_self)
+	arg2 := (*C.char)(r_text)
+	arg3 := (C.GDExtensionInt)(p_max_write_length)
+	__retValue := C.cgo_GDExtensionInterfaceStringToLatin1Chars(arg0, arg1, arg2, arg3)
+	return (int64)(__retValue)
+}
+func cgo_StringToUtf8Chars(p_self unsafe.Pointer, r_text unsafe.Pointer, p_max_write_length int64) int64 {
+	arg0 := (C.GDExtensionInterfaceStringToUtf8Chars)(capi.StringToUtf8Chars)
+	arg1 := (C.GDExtensionConstStringPtr)(p_self)
+	arg2 := (*C.char)(r_text)
+	arg3 := (C.GDExtensionInt)(p_max_write_length)
+	__retValue := C.cgo_GDExtensionInterfaceStringToUtf8Chars(arg0, arg1, arg2, arg3)
+	return (int64)(__retValue)
+}
+func cgo_StringToUtf16Chars(p_self unsafe.Pointer, r_text unsafe.Pointer, p_max_write_length int64) int64 {
+	arg0 := (C.GDExtensionInterfaceStringToUtf16Chars)(capi.StringToUtf16Chars)
+	arg1 := (C.GDExtensionConstStringPtr)(p_self)
+	arg2 := (*C.char16_t)(r_text)
+	arg3 := (C.GDExtensionInt)(p_max_write_length)
+	__retValue := C.cgo_GDExtensionInterfaceStringToUtf16Chars(arg0, arg1, arg2, arg3)
+	return (int64)(__retValue)
+}
+func cgo_StringToUtf32Chars(p_self unsafe.Pointer, r_text unsafe.Pointer, p_max_write_length int64) int64 {
+	arg0 := (C.GDExtensionInterfaceStringToUtf32Chars)(capi.StringToUtf32Chars)
+	arg1 := (C.GDExtensionConstStringPtr)(p_self)
+	arg2 := (*C.char32_t)(r_text)
+	arg3 := (C.GDExtensionInt)(p_max_write_length)
+	__retValue := C.cgo_GDExtensionInterfaceStringToUtf32Chars(arg0, arg1, arg2, arg3)
+	return (int64)(__retValue)
+}
+func cgo_StringToWideChars(p_self unsafe.Pointer, r_text unsafe.Pointer, p_max_write_length int64) int64 {
+	arg0 := (C.GDExtensionInterfaceStringToWideChars)(capi.StringToWideChars)
+	arg1 := (C.GDExtensionConstStringPtr)(p_self)
+	arg2 := (*C.wchar_t)(r_text)
+	arg3 := (C.GDExtensionInt)(p_max_write_length)
+	__retValue := C.cgo_GDExtensionInterfaceStringToWideChars(arg0, arg1, arg2, arg3)
+	return (int64)(__retValue)
+}
+func cgo_StringOperatorIndex(p_self unsafe.Pointer, p_index int64) unsafe.Pointer {
+	arg0 := (C.GDExtensionInterfaceStringOperatorIndex)(capi.StringOperatorIndex)
+	arg1 := (C.GDExtensionStringPtr)(p_self)
+	arg2 := (C.GDExtensionInt)(p_index)
+	__retValue := C.cgo_GDExtensionInterfaceStringOperatorIndex(arg0, arg1, arg2)
+	return (unsafe.Pointer)(__retValue)
+}
+func cgo_StringOperatorIndexConst(p_self unsafe.Pointer, p_index int64) unsafe.Pointer {
+	arg0 := (C.GDExtensionInterfaceStringOperatorIndexConst)(capi.StringOperatorIndexConst)
+	arg1 := (C.GDExtensionConstStringPtr)(p_self)
+	arg2 := (C.GDExtensionInt)(p_index)
+	__retValue := C.cgo_GDExtensionInterfaceStringOperatorIndexConst(arg0, arg1, arg2)
+	return (unsafe.Pointer)(__retValue)
+}
+func cgo_StringOperatorPlusEqString(p_self unsafe.Pointer, p_b unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceStringOperatorPlusEqString)(capi.StringOperatorPlusEqString)
+	arg1 := (C.GDExtensionStringPtr)(p_self)
+	arg2 := (C.GDExtensionConstStringPtr)(p_b)
+	C.cgo_GDExtensionInterfaceStringOperatorPlusEqString(arg0, arg1, arg2)
+
+}
+func cgo_StringOperatorPlusEqChar(p_self unsafe.Pointer, p_b rune) {
+	arg0 := (C.GDExtensionInterfaceStringOperatorPlusEqChar)(capi.StringOperatorPlusEqChar)
+	arg1 := (C.GDExtensionStringPtr)(p_self)
+	arg2 := (C.char32_t)(p_b)
+	C.cgo_GDExtensionInterfaceStringOperatorPlusEqChar(arg0, arg1, arg2)
+
+}
+func cgo_StringOperatorPlusEqCstr(p_self unsafe.Pointer, p_b string) {
+	arg0 := (C.GDExtensionInterfaceStringOperatorPlusEqCstr)(capi.StringOperatorPlusEqCstr)
+	arg1 := (C.GDExtensionStringPtr)(p_self)
+	arg2 := C.CString(p_b)
+	C.cgo_GDExtensionInterfaceStringOperatorPlusEqCstr(arg0, arg1, arg2)
+
+}
+func cgo_StringOperatorPlusEqWcstr(p_self unsafe.Pointer, p_b unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceStringOperatorPlusEqWcstr)(capi.StringOperatorPlusEqWcstr)
+	arg1 := (C.GDExtensionStringPtr)(p_self)
+	arg2 := (*C.wchar_t)(p_b)
+	C.cgo_GDExtensionInterfaceStringOperatorPlusEqWcstr(arg0, arg1, arg2)
+
+}
+func cgo_StringOperatorPlusEqC32str(p_self unsafe.Pointer, p_b unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceStringOperatorPlusEqC32str)(capi.StringOperatorPlusEqC32str)
+	arg1 := (C.GDExtensionStringPtr)(p_self)
+	arg2 := (*C.char32_t)(p_b)
+	C.cgo_GDExtensionInterfaceStringOperatorPlusEqC32str(arg0, arg1, arg2)
+
+}
+func cgo_StringResize(p_self unsafe.Pointer, p_resize int64) int64 {
+	arg0 := (C.GDExtensionInterfaceStringResize)(capi.StringResize)
+	arg1 := (C.GDExtensionStringPtr)(p_self)
+	arg2 := (C.GDExtensionInt)(p_resize)
+	__retValue := C.cgo_GDExtensionInterfaceStringResize(arg0, arg1, arg2)
+	return (int64)(__retValue)
+}
+func cgo_StringNameNewWithLatin1Chars(r_dest unsafe.Pointer, p_contents string, p_is_static bool) {
+	arg0 := (C.GDExtensionInterfaceStringNameNewWithLatin1Chars)(capi.StringNameNewWithLatin1Chars)
+	arg1 := (C.GDExtensionUninitializedStringNamePtr)(r_dest)
+	arg2 := C.CString(p_contents)
+	arg3 := ToGdBool(p_is_static)
+	C.cgo_GDExtensionInterfaceStringNameNewWithLatin1Chars(arg0, arg1, arg2, arg3)
+
+}
+func cgo_StringNameNewWithUtf8Chars(r_dest unsafe.Pointer, p_contents string) {
+	arg0 := (C.GDExtensionInterfaceStringNameNewWithUtf8Chars)(capi.StringNameNewWithUtf8Chars)
+	arg1 := (C.GDExtensionUninitializedStringNamePtr)(r_dest)
+	arg2 := C.CString(p_contents)
+	C.cgo_GDExtensionInterfaceStringNameNewWithUtf8Chars(arg0, arg1, arg2)
+
+}
+func cgo_StringNameNewWithUtf8CharsAndLen(r_dest unsafe.Pointer, p_contents string, p_size int64) {
+	arg0 := (C.GDExtensionInterfaceStringNameNewWithUtf8CharsAndLen)(capi.StringNameNewWithUtf8CharsAndLen)
+	arg1 := (C.GDExtensionUninitializedStringNamePtr)(r_dest)
+	arg2 := C.CString(p_contents)
+	arg3 := (C.GDExtensionInt)(p_size)
+	C.cgo_GDExtensionInterfaceStringNameNewWithUtf8CharsAndLen(arg0, arg1, arg2, arg3)
+
+}
+func cgo_XmlParserOpenBuffer(p_instance unsafe.Pointer, p_buffer unsafe.Pointer, p_size int64) int64 {
+	arg0 := (C.GDExtensionInterfaceXmlParserOpenBuffer)(capi.XmlParserOpenBuffer)
+	arg1 := (C.GDExtensionObjectPtr)(p_instance)
+	arg2 := (*C.uint8_t)(p_buffer)
+	arg3 := (C.size_t)(p_size)
+	__retValue := C.cgo_GDExtensionInterfaceXmlParserOpenBuffer(arg0, arg1, arg2, arg3)
+	return (int64)(__retValue)
+}
+func cgo_FileAccessStoreBuffer(p_instance unsafe.Pointer, p_src unsafe.Pointer, p_length uint64) {
+	arg0 := (C.GDExtensionInterfaceFileAccessStoreBuffer)(capi.FileAccessStoreBuffer)
+	arg1 := (C.GDExtensionObjectPtr)(p_instance)
+	arg2 := (*C.uint8_t)(p_src)
+	arg3 := (C.uint64_t)(p_length)
+	C.cgo_GDExtensionInterfaceFileAccessStoreBuffer(arg0, arg1, arg2, arg3)
+
+}
+func cgo_FileAccessGetBuffer(p_instance unsafe.Pointer, p_dst unsafe.Pointer, p_length uint64) uint64 {
+	arg0 := (C.GDExtensionInterfaceFileAccessGetBuffer)(capi.FileAccessGetBuffer)
+	arg1 := (C.GDExtensionConstObjectPtr)(p_instance)
+	arg2 := (*C.uint8_t)(p_dst)
+	arg3 := (C.uint64_t)(p_length)
+	__retValue := C.cgo_GDExtensionInterfaceFileAccessGetBuffer(arg0, arg1, arg2, arg3)
+	return (uint64)(__retValue)
+}
+func cgo_ImagePtrw(p_instance unsafe.Pointer) unsafe.Pointer {
+	arg0 := (C.GDExtensionInterfaceImagePtrw)(capi.ImagePtrw)
+	arg1 := (C.GDExtensionObjectPtr)(p_instance)
+	__retValue := C.cgo_GDExtensionInterfaceImagePtrw(arg0, arg1)
+	return (unsafe.Pointer)(__retValue)
+}
+func cgo_ImagePtr(p_instance unsafe.Pointer) unsafe.Pointer {
+	arg0 := (C.GDExtensionInterfaceImagePtr)(capi.ImagePtr)
+	arg1 := (C.GDExtensionObjectPtr)(p_instance)
+	__retValue := C.cgo_GDExtensionInterfaceImagePtr(arg0, arg1)
+	return (unsafe.Pointer)(__retValue)
+}
+func cgo_WorkerThreadPoolAddNativeGroupTask(p_instance unsafe.Pointer, p_func unsafe.Pointer /*void(*p_func)(void * ,uint32_t)*/, p_userdata unsafe.Pointer, p_elements int, p_tasks int, p_high_priority bool, p_description unsafe.Pointer) int64 {
+	arg0 := (C.GDExtensionInterfaceWorkerThreadPoolAddNativeGroupTask)(capi.WorkerThreadPoolAddNativeGroupTask)
+	arg1 := (C.GDExtensionObjectPtr)(p_instance)
+	arg2 := (*[0]byte)(p_func)
+	arg3 := unsafe.Pointer(p_userdata)
+	arg4 := (C.int)(p_elements)
+	arg5 := (C.int)(p_tasks)
+	arg6 := ToGdBool(p_high_priority)
+	arg7 := (C.GDExtensionConstStringPtr)(p_description)
+	__retValue := C.cgo_GDExtensionInterfaceWorkerThreadPoolAddNativeGroupTask(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7)
+	return (int64)(__retValue)
+}
+func cgo_WorkerThreadPoolAddNativeTask(p_instance unsafe.Pointer, p_func unsafe.Pointer /*void(*p_func)(void * )*/, p_userdata unsafe.Pointer, p_high_priority bool, p_description unsafe.Pointer) int64 {
+	arg0 := (C.GDExtensionInterfaceWorkerThreadPoolAddNativeTask)(capi.WorkerThreadPoolAddNativeTask)
+	arg1 := (C.GDExtensionObjectPtr)(p_instance)
+	arg2 := (*[0]byte)(p_func)
+	arg3 := unsafe.Pointer(p_userdata)
+	arg4 := ToGdBool(p_high_priority)
+	arg5 := (C.GDExtensionConstStringPtr)(p_description)
+	__retValue := C.cgo_GDExtensionInterfaceWorkerThreadPoolAddNativeTask(arg0, arg1, arg2, arg3, arg4, arg5)
+	return (int64)(__retValue)
+}
+func cgo_PackedByteArrayOperatorIndex(p_self unsafe.Pointer, p_index int64) unsafe.Pointer {
+	arg0 := (C.GDExtensionInterfacePackedByteArrayOperatorIndex)(capi.PackedByteArrayOperatorIndex)
+	arg1 := (C.GDExtensionTypePtr)(p_self)
+	arg2 := (C.GDExtensionInt)(p_index)
+	__retValue := C.cgo_GDExtensionInterfacePackedByteArrayOperatorIndex(arg0, arg1, arg2)
+	return (unsafe.Pointer)(__retValue)
+}
+func cgo_PackedByteArrayOperatorIndexConst(p_self unsafe.Pointer, p_index int64) unsafe.Pointer {
+	arg0 := (C.GDExtensionInterfacePackedByteArrayOperatorIndexConst)(capi.PackedByteArrayOperatorIndexConst)
+	arg1 := (C.GDExtensionConstTypePtr)(p_self)
+	arg2 := (C.GDExtensionInt)(p_index)
+	__retValue := C.cgo_GDExtensionInterfacePackedByteArrayOperatorIndexConst(arg0, arg1, arg2)
+	return (unsafe.Pointer)(__retValue)
+}
+func cgo_PackedFloat32ArrayOperatorIndex(p_self unsafe.Pointer, p_index int64) unsafe.Pointer {
+	arg0 := (C.GDExtensionInterfacePackedFloat32ArrayOperatorIndex)(capi.PackedFloat32ArrayOperatorIndex)
+	arg1 := (C.GDExtensionTypePtr)(p_self)
+	arg2 := (C.GDExtensionInt)(p_index)
+	__retValue := C.cgo_GDExtensionInterfacePackedFloat32ArrayOperatorIndex(arg0, arg1, arg2)
+	return (unsafe.Pointer)(__retValue)
+}
+func cgo_PackedFloat32ArrayOperatorIndexConst(p_self unsafe.Pointer, p_index int64) unsafe.Pointer {
+	arg0 := (C.GDExtensionInterfacePackedFloat32ArrayOperatorIndexConst)(capi.PackedFloat32ArrayOperatorIndexConst)
+	arg1 := (C.GDExtensionConstTypePtr)(p_self)
+	arg2 := (C.GDExtensionInt)(p_index)
+	__retValue := C.cgo_GDExtensionInterfacePackedFloat32ArrayOperatorIndexConst(arg0, arg1, arg2)
+	return (unsafe.Pointer)(__retValue)
+}
+func cgo_PackedFloat64ArrayOperatorIndex(p_self unsafe.Pointer, p_index int64) unsafe.Pointer {
+	arg0 := (C.GDExtensionInterfacePackedFloat64ArrayOperatorIndex)(capi.PackedFloat32ArrayOperatorIndex)
+	arg1 := (C.GDExtensionTypePtr)(p_self)
+	arg2 := (C.GDExtensionInt)(p_index)
+	__retValue := C.cgo_GDExtensionInterfacePackedFloat64ArrayOperatorIndex(arg0, arg1, arg2)
+	return (unsafe.Pointer)(__retValue)
+}
+func cgo_PackedFloat64ArrayOperatorIndexConst(p_self unsafe.Pointer, p_index int64) unsafe.Pointer {
+	arg0 := (C.GDExtensionInterfacePackedFloat64ArrayOperatorIndexConst)(capi.PackedFloat32ArrayOperatorIndexConst)
+	arg1 := (C.GDExtensionConstTypePtr)(p_self)
+	arg2 := (C.GDExtensionInt)(p_index)
+	__retValue := C.cgo_GDExtensionInterfacePackedFloat64ArrayOperatorIndexConst(arg0, arg1, arg2)
+	return (unsafe.Pointer)(__retValue)
+}
+func cgo_PackedInt32ArrayOperatorIndex(p_self unsafe.Pointer, p_index int64) unsafe.Pointer {
+	arg0 := (C.GDExtensionInterfacePackedInt32ArrayOperatorIndex)(capi.PackedInt32ArrayOperatorIndex)
+	arg1 := (C.GDExtensionTypePtr)(p_self)
+	arg2 := (C.GDExtensionInt)(p_index)
+	__retValue := C.cgo_GDExtensionInterfacePackedInt32ArrayOperatorIndex(arg0, arg1, arg2)
+	return (unsafe.Pointer)(__retValue)
+}
+func cgo_PackedInt32ArrayOperatorIndexConst(p_self unsafe.Pointer, p_index int64) unsafe.Pointer {
+	arg0 := (C.GDExtensionInterfacePackedInt32ArrayOperatorIndexConst)(capi.PackedInt32ArrayOperatorIndexConst)
+	arg1 := (C.GDExtensionConstTypePtr)(p_self)
+	arg2 := (C.GDExtensionInt)(p_index)
+	__retValue := C.cgo_GDExtensionInterfacePackedInt32ArrayOperatorIndexConst(arg0, arg1, arg2)
+	return (unsafe.Pointer)(__retValue)
+}
+func cgo_PackedInt64ArrayOperatorIndex(p_self unsafe.Pointer, p_index int64) unsafe.Pointer {
+	arg0 := (C.GDExtensionInterfacePackedInt64ArrayOperatorIndex)(capi.PackedInt64ArrayOperatorIndex)
+	arg1 := (C.GDExtensionTypePtr)(p_self)
+	arg2 := (C.GDExtensionInt)(p_index)
+	__retValue := C.cgo_GDExtensionInterfacePackedInt64ArrayOperatorIndex(arg0, arg1, arg2)
+	return (unsafe.Pointer)(__retValue)
+}
+func cgo_PackedInt64ArrayOperatorIndexConst(p_self unsafe.Pointer, p_index int64) unsafe.Pointer {
+	arg0 := (C.GDExtensionInterfacePackedInt64ArrayOperatorIndexConst)(capi.PackedInt64ArrayOperatorIndexConst)
+	arg1 := (C.GDExtensionConstTypePtr)(p_self)
+	arg2 := (C.GDExtensionInt)(p_index)
+	__retValue := C.cgo_GDExtensionInterfacePackedInt64ArrayOperatorIndexConst(arg0, arg1, arg2)
+	return (unsafe.Pointer)(__retValue)
+}
+func cgo_PackedStringArrayOperatorIndex(p_self unsafe.Pointer, p_index int64) unsafe.Pointer {
+	arg0 := (C.GDExtensionInterfacePackedStringArrayOperatorIndex)(capi.PackedStringArrayOperatorIndex)
+	arg1 := (C.GDExtensionTypePtr)(p_self)
+	arg2 := (C.GDExtensionInt)(p_index)
+	__retValue := C.cgo_GDExtensionInterfacePackedStringArrayOperatorIndex(arg0, arg1, arg2)
+	return (unsafe.Pointer)(__retValue)
+}
+func cgo_PackedStringArrayOperatorIndexConst(p_self unsafe.Pointer, p_index int64) unsafe.Pointer {
+	arg0 := (C.GDExtensionInterfacePackedStringArrayOperatorIndexConst)(capi.PackedStringArrayOperatorIndexConst)
+	arg1 := (C.GDExtensionConstTypePtr)(p_self)
+	arg2 := (C.GDExtensionInt)(p_index)
+	__retValue := C.cgo_GDExtensionInterfacePackedStringArrayOperatorIndexConst(arg0, arg1, arg2)
+	return (unsafe.Pointer)(__retValue)
+}
+func cgo_PackedVector2ArrayOperatorIndex(p_self unsafe.Pointer, p_index int64) unsafe.Pointer {
+	arg0 := (C.GDExtensionInterfacePackedVector2ArrayOperatorIndex)(capi.PackedVector2ArrayOperatorIndex)
+	arg1 := (C.GDExtensionTypePtr)(p_self)
+	arg2 := (C.GDExtensionInt)(p_index)
+	__retValue := C.cgo_GDExtensionInterfacePackedVector2ArrayOperatorIndex(arg0, arg1, arg2)
+	return (unsafe.Pointer)(__retValue)
+}
+func cgo_PackedVector2ArrayOperatorIndexConst(p_self unsafe.Pointer, p_index int64) unsafe.Pointer {
+	arg0 := (C.GDExtensionInterfacePackedVector2ArrayOperatorIndexConst)(capi.PackedVector2ArrayOperatorIndexConst)
+	arg1 := (C.GDExtensionConstTypePtr)(p_self)
+	arg2 := (C.GDExtensionInt)(p_index)
+	__retValue := C.cgo_GDExtensionInterfacePackedVector2ArrayOperatorIndexConst(arg0, arg1, arg2)
+	return (unsafe.Pointer)(__retValue)
+}
+func cgo_PackedVector3ArrayOperatorIndex(p_self unsafe.Pointer, p_index int64) unsafe.Pointer {
+	arg0 := (C.GDExtensionInterfacePackedVector3ArrayOperatorIndex)(capi.PackedVector3ArrayOperatorIndex)
+	arg1 := (C.GDExtensionTypePtr)(p_self)
+	arg2 := (C.GDExtensionInt)(p_index)
+	__retValue := C.cgo_GDExtensionInterfacePackedVector3ArrayOperatorIndex(arg0, arg1, arg2)
+	return (unsafe.Pointer)(__retValue)
+}
+func cgo_PackedVector3ArrayOperatorIndexConst(p_self unsafe.Pointer, p_index int64) unsafe.Pointer {
+	arg0 := (C.GDExtensionInterfacePackedVector3ArrayOperatorIndexConst)(capi.PackedVector3ArrayOperatorIndexConst)
+	arg1 := (C.GDExtensionConstTypePtr)(p_self)
+	arg2 := (C.GDExtensionInt)(p_index)
+	__retValue := C.cgo_GDExtensionInterfacePackedVector3ArrayOperatorIndexConst(arg0, arg1, arg2)
+	return (unsafe.Pointer)(__retValue)
+}
+func cgo_PackedVector4ArrayOperatorIndex(p_self unsafe.Pointer, p_index int64) unsafe.Pointer {
+	arg0 := (C.GDExtensionInterfacePackedVector4ArrayOperatorIndex)(capi.PackedVector4ArrayOperatorIndex)
+	arg1 := (C.GDExtensionTypePtr)(p_self)
+	arg2 := (C.GDExtensionInt)(p_index)
+	__retValue := C.cgo_GDExtensionInterfacePackedVector4ArrayOperatorIndex(arg0, arg1, arg2)
+	return (unsafe.Pointer)(__retValue)
+}
+func cgo_PackedVector4ArrayOperatorIndexConst(p_self unsafe.Pointer, p_index int64) unsafe.Pointer {
+	arg0 := (C.GDExtensionInterfacePackedVector4ArrayOperatorIndexConst)(capi.PackedVector4ArrayOperatorIndexConst)
+	arg1 := (C.GDExtensionConstTypePtr)(p_self)
+	arg2 := (C.GDExtensionInt)(p_index)
+	__retValue := C.cgo_GDExtensionInterfacePackedVector4ArrayOperatorIndexConst(arg0, arg1, arg2)
+	return (unsafe.Pointer)(__retValue)
+}
+func cgo_PackedColorArrayOperatorIndex(p_self unsafe.Pointer, p_index int64) unsafe.Pointer {
+	arg0 := (C.GDExtensionInterfacePackedColorArrayOperatorIndex)(capi.PackedColorArrayOperatorIndex)
+	arg1 := (C.GDExtensionTypePtr)(p_self)
+	arg2 := (C.GDExtensionInt)(p_index)
+	__retValue := C.cgo_GDExtensionInterfacePackedColorArrayOperatorIndex(arg0, arg1, arg2)
+	return (unsafe.Pointer)(__retValue)
+}
+func cgo_PackedColorArrayOperatorIndexConst(p_self unsafe.Pointer, p_index int64) unsafe.Pointer {
+	arg0 := (C.GDExtensionInterfacePackedColorArrayOperatorIndexConst)(capi.PackedColorArrayOperatorIndexConst)
+	arg1 := (C.GDExtensionConstTypePtr)(p_self)
+	arg2 := (C.GDExtensionInt)(p_index)
+	__retValue := C.cgo_GDExtensionInterfacePackedColorArrayOperatorIndexConst(arg0, arg1, arg2)
+	return (unsafe.Pointer)(__retValue)
+}
+func cgo_ArrayOperatorIndex(p_self unsafe.Pointer, p_index int64) unsafe.Pointer {
+	arg0 := (C.GDExtensionInterfaceArrayOperatorIndex)(capi.ArrayOperatorIndex)
+	arg1 := (C.GDExtensionTypePtr)(p_self)
+	arg2 := (C.GDExtensionInt)(p_index)
+	__retValue := C.cgo_GDExtensionInterfaceArrayOperatorIndex(arg0, arg1, arg2)
+	return (unsafe.Pointer)(__retValue)
+}
+func cgo_ArrayOperatorIndexConst(p_self unsafe.Pointer, p_index int64) unsafe.Pointer {
+	arg0 := (C.GDExtensionInterfaceArrayOperatorIndexConst)(capi.ArrayOperatorIndexConst)
+	arg1 := (C.GDExtensionConstTypePtr)(p_self)
+	arg2 := (C.GDExtensionInt)(p_index)
+	__retValue := C.cgo_GDExtensionInterfaceArrayOperatorIndexConst(arg0, arg1, arg2)
+	return (unsafe.Pointer)(__retValue)
+}
+func cgo_ArrayRef(p_self unsafe.Pointer, p_from unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceArrayRef)(capi.ArrayRef)
+	arg1 := (C.GDExtensionTypePtr)(p_self)
+	arg2 := (C.GDExtensionConstTypePtr)(p_from)
+	C.cgo_GDExtensionInterfaceArrayRef(arg0, arg1, arg2)
+
+}
+func cgo_ArraySetTyped(p_self unsafe.Pointer, p_type uint32 /*VariantType*/, p_class_name unsafe.Pointer, p_script unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceArraySetTyped)(capi.ArraySetTyped)
+	arg1 := (C.GDExtensionTypePtr)(p_self)
+	arg2 := (C.GDExtensionVariantType)(p_type)
+	arg3 := (C.GDExtensionConstStringNamePtr)(p_class_name)
+	arg4 := (C.GDExtensionConstVariantPtr)(p_script)
+	C.cgo_GDExtensionInterfaceArraySetTyped(arg0, arg1, arg2, arg3, arg4)
+
+}
+func cgo_DictionaryOperatorIndex(p_self unsafe.Pointer, p_key unsafe.Pointer) unsafe.Pointer {
+	arg0 := (C.GDExtensionInterfaceDictionaryOperatorIndex)(capi.DictionaryOperatorIndex)
+	arg1 := (C.GDExtensionTypePtr)(p_self)
+	arg2 := (C.GDExtensionConstVariantPtr)(p_key)
+	__retValue := C.cgo_GDExtensionInterfaceDictionaryOperatorIndex(arg0, arg1, arg2)
+	return (unsafe.Pointer)(__retValue)
+}
+func cgo_DictionaryOperatorIndexConst(p_self unsafe.Pointer, p_key unsafe.Pointer) unsafe.Pointer {
+	arg0 := (C.GDExtensionInterfaceDictionaryOperatorIndexConst)(capi.DictionaryOperatorIndexConst)
+	arg1 := (C.GDExtensionConstTypePtr)(p_self)
+	arg2 := (C.GDExtensionConstVariantPtr)(p_key)
+	__retValue := C.cgo_GDExtensionInterfaceDictionaryOperatorIndexConst(arg0, arg1, arg2)
+	return (unsafe.Pointer)(__retValue)
+}
+func cgo_ObjectMethodBindCall(p_method_bind unsafe.Pointer, p_instance unsafe.Pointer, p_args unsafe.Pointer, p_arg_count int64, r_ret unsafe.Pointer, r_error unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceObjectMethodBindCall)(capi.ObjectMethodBindCall)
+	arg1 := (C.GDExtensionMethodBindPtr)(p_method_bind)
+	arg2 := (C.GDExtensionObjectPtr)(p_instance)
+	arg3 := (*C.GDExtensionConstVariantPtr)(p_args)
+	arg4 := (C.GDExtensionInt)(p_arg_count)
+	arg5 := (C.GDExtensionUninitializedVariantPtr)(r_ret)
+	arg6 := (*C.GDExtensionCallError)(r_error)
+	C.cgo_GDExtensionInterfaceObjectMethodBindCall(arg0, arg1, arg2, arg3, arg4, arg5, arg6)
+
+}
+func cgo_ObjectMethodBindPtrcall(p_method_bind unsafe.Pointer, p_instance unsafe.Pointer, p_args unsafe.Pointer, r_ret unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceObjectMethodBindPtrcall)(capi.ObjectMethodBindPtrcall)
+	arg1 := (C.GDExtensionMethodBindPtr)(p_method_bind)
+	arg2 := (C.GDExtensionObjectPtr)(p_instance)
+	arg3 := (*C.GDExtensionConstTypePtr)(p_args)
+	arg4 := (C.GDExtensionTypePtr)(r_ret)
+	C.cgo_GDExtensionInterfaceObjectMethodBindPtrcall(arg0, arg1, arg2, arg3, arg4)
+
+}
+func cgo_ObjectDestroy(p_o unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceObjectDestroy)(capi.ObjectDestroy)
+	arg1 := (C.GDExtensionObjectPtr)(p_o)
+	C.cgo_GDExtensionInterfaceObjectDestroy(arg0, arg1)
+
+}
+func cgo_GlobalGetSingleton(p_name unsafe.Pointer) unsafe.Pointer {
+	arg0 := (C.GDExtensionInterfaceGlobalGetSingleton)(capi.GlobalGetSingleton)
+	arg1 := (C.GDExtensionConstStringNamePtr)(p_name)
+	__retValue := C.cgo_GDExtensionInterfaceGlobalGetSingleton(arg0, arg1)
+	return (unsafe.Pointer)(__retValue)
+}
+func cgo_ObjectGetInstanceBinding(p_o unsafe.Pointer, p_token unsafe.Pointer, p_callbacks unsafe.Pointer) unsafe.Pointer {
+	arg0 := (C.GDExtensionInterfaceObjectGetInstanceBinding)(capi.ObjectGetInstanceBinding)
+	arg1 := (C.GDExtensionObjectPtr)(p_o)
+	arg2 := unsafe.Pointer(p_token)
+	arg3 := (*C.GDExtensionInstanceBindingCallbacks)(p_callbacks)
+	__retValue := C.cgo_GDExtensionInterfaceObjectGetInstanceBinding(arg0, arg1, arg2, arg3)
+	return (unsafe.Pointer)(__retValue)
+}
+func cgo_ObjectSetInstanceBinding(p_o unsafe.Pointer, p_token unsafe.Pointer, p_binding unsafe.Pointer, p_callbacks unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceObjectSetInstanceBinding)(capi.ObjectSetInstanceBinding)
+	arg1 := (C.GDExtensionObjectPtr)(p_o)
+	arg2 := unsafe.Pointer(p_token)
+	arg3 := unsafe.Pointer(p_binding)
+	arg4 := (*C.GDExtensionInstanceBindingCallbacks)(p_callbacks)
+	C.cgo_GDExtensionInterfaceObjectSetInstanceBinding(arg0, arg1, arg2, arg3, arg4)
+
+}
+func cgo_ObjectFreeInstanceBinding(p_o unsafe.Pointer, p_token unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceObjectFreeInstanceBinding)(capi.ObjectFreeInstanceBinding)
+	arg1 := (C.GDExtensionObjectPtr)(p_o)
+	arg2 := unsafe.Pointer(p_token)
+	C.cgo_GDExtensionInterfaceObjectFreeInstanceBinding(arg0, arg1, arg2)
+
+}
+func cgo_ObjectSetInstance(p_o unsafe.Pointer, p_classname unsafe.Pointer, p_instance unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceObjectSetInstance)(capi.ObjectSetInstance)
+	arg1 := (C.GDExtensionObjectPtr)(p_o)
+	arg2 := (C.GDExtensionConstStringNamePtr)(p_classname)
+	arg3 := (C.GDExtensionClassInstancePtr)(p_instance)
+	C.cgo_GDExtensionInterfaceObjectSetInstance(arg0, arg1, arg2, arg3)
+
+}
+func cgo_ObjectGetClassName(p_object unsafe.Pointer, p_library unsafe.Pointer, r_class_name unsafe.Pointer) bool {
+	arg0 := (C.GDExtensionInterfaceObjectGetClassName)(capi.ObjectGetClassName)
+	arg1 := (C.GDExtensionConstObjectPtr)(p_object)
+	arg2 := (C.GDExtensionClassLibraryPtr)(p_library)
+	arg3 := (C.GDExtensionUninitializedStringNamePtr)(r_class_name)
+	__retValue := C.cgo_GDExtensionInterfaceObjectGetClassName(arg0, arg1, arg2, arg3)
+	return __retValue != 0
+}
+func cgo_ObjectCastTo(p_object unsafe.Pointer, p_class_tag unsafe.Pointer) unsafe.Pointer {
+	arg0 := (C.GDExtensionInterfaceObjectCastTo)(capi.ObjectCastTo)
+	arg1 := (C.GDExtensionConstObjectPtr)(p_object)
+	arg2 := unsafe.Pointer(p_class_tag)
+	__retValue := C.cgo_GDExtensionInterfaceObjectCastTo(arg0, arg1, arg2)
+	return (unsafe.Pointer)(__retValue)
+}
+func cgo_ObjectGetInstanceFromId(p_instance_id int64) unsafe.Pointer {
+	arg0 := (C.GDExtensionInterfaceObjectGetInstanceFromId)(capi.ObjectGetInstanceFromId)
+	arg1 := (C.GDObjectInstanceID)(p_instance_id)
+	__retValue := C.cgo_GDExtensionInterfaceObjectGetInstanceFromId(arg0, arg1)
+	return (unsafe.Pointer)(__retValue)
+}
+func cgo_ObjectGetInstanceId(p_object unsafe.Pointer) int64 {
+	arg0 := (C.GDExtensionInterfaceObjectGetInstanceId)(capi.ObjectGetInstanceId)
+	arg1 := (C.GDExtensionConstObjectPtr)(p_object)
+	__retValue := C.cgo_GDExtensionInterfaceObjectGetInstanceId(arg0, arg1)
+	return (int64)(__retValue)
+}
+func cgo_ObjectHasScriptMethod(p_object unsafe.Pointer, p_method unsafe.Pointer) bool {
+	arg0 := (C.GDExtensionInterfaceObjectHasScriptMethod)(capi.ObjectHasScriptMethod)
+	arg1 := (C.GDExtensionConstObjectPtr)(p_object)
+	arg2 := (C.GDExtensionConstStringNamePtr)(p_method)
+	__retValue := C.cgo_GDExtensionInterfaceObjectHasScriptMethod(arg0, arg1, arg2)
+	return __retValue != 0
+}
+func cgo_ObjectCallScriptMethod(p_object unsafe.Pointer, p_method unsafe.Pointer, p_args unsafe.Pointer, p_argument_count int64, r_return unsafe.Pointer, r_error unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceObjectCallScriptMethod)(capi.ObjectCallScriptMethod)
+	arg1 := (C.GDExtensionObjectPtr)(p_object)
+	arg2 := (C.GDExtensionConstStringNamePtr)(p_method)
+	arg3 := (*C.GDExtensionConstVariantPtr)(p_args)
+	arg4 := (C.GDExtensionInt)(p_argument_count)
+	arg5 := (C.GDExtensionUninitializedVariantPtr)(r_return)
+	arg6 := (*C.GDExtensionCallError)(r_error)
+	C.cgo_GDExtensionInterfaceObjectCallScriptMethod(arg0, arg1, arg2, arg3, arg4, arg5, arg6)
+
+}
+func cgo_RefGetObject(p_ref unsafe.Pointer) unsafe.Pointer {
+	arg0 := (C.GDExtensionInterfaceRefGetObject)(capi.RefGetObject)
+	arg1 := (C.GDExtensionConstRefPtr)(p_ref)
+	__retValue := C.cgo_GDExtensionInterfaceRefGetObject(arg0, arg1)
+	return (unsafe.Pointer)(__retValue)
+}
+func cgo_RefSetObject(p_ref unsafe.Pointer, p_object unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceRefSetObject)(capi.RefSetObject)
+	arg1 := (C.GDExtensionRefPtr)(p_ref)
+	arg2 := (C.GDExtensionObjectPtr)(p_object)
+	C.cgo_GDExtensionInterfaceRefSetObject(arg0, arg1, arg2)
+
+}
+func cgo_ScriptInstanceCreate(p_info unsafe.Pointer, p_instance_data unsafe.Pointer) unsafe.Pointer {
+	arg0 := (C.GDExtensionInterfaceScriptInstanceCreate)(capi.ScriptInstanceCreate)
+	arg1 := (*C.GDExtensionScriptInstanceInfo)(p_info)
+	arg2 := (C.GDExtensionScriptInstanceDataPtr)(p_instance_data)
+	__retValue := C.cgo_GDExtensionInterfaceScriptInstanceCreate(arg0, arg1, arg2)
+	return (unsafe.Pointer)(__retValue)
+}
+func cgo_ScriptInstanceCreate2(p_info unsafe.Pointer, p_instance_data unsafe.Pointer) unsafe.Pointer {
+	arg0 := (C.GDExtensionInterfaceScriptInstanceCreate2)(capi.ScriptInstanceCreate2)
+	arg1 := (*C.GDExtensionScriptInstanceInfo2)(p_info)
+	arg2 := (C.GDExtensionScriptInstanceDataPtr)(p_instance_data)
+	__retValue := C.cgo_GDExtensionInterfaceScriptInstanceCreate2(arg0, arg1, arg2)
+	return (unsafe.Pointer)(__retValue)
+}
+func cgo_ScriptInstanceCreate3(p_info unsafe.Pointer, p_instance_data unsafe.Pointer) unsafe.Pointer {
+	arg0 := (C.GDExtensionInterfaceScriptInstanceCreate3)(capi.ScriptInstanceCreate3)
+	arg1 := (*C.GDExtensionScriptInstanceInfo3)(p_info)
+	arg2 := (C.GDExtensionScriptInstanceDataPtr)(p_instance_data)
+	__retValue := C.cgo_GDExtensionInterfaceScriptInstanceCreate3(arg0, arg1, arg2)
+	return (unsafe.Pointer)(__retValue)
+}
+func cgo_PlaceHolderScriptInstanceCreate(p_language unsafe.Pointer, p_script unsafe.Pointer, p_owner unsafe.Pointer) unsafe.Pointer {
+	arg0 := (C.GDExtensionInterfacePlaceHolderScriptInstanceCreate)(capi.PlaceHolderScriptInstanceCreate)
+	arg1 := (C.GDExtensionObjectPtr)(p_language)
+	arg2 := (C.GDExtensionObjectPtr)(p_script)
+	arg3 := (C.GDExtensionObjectPtr)(p_owner)
+	__retValue := C.cgo_GDExtensionInterfacePlaceHolderScriptInstanceCreate(arg0, arg1, arg2, arg3)
+	return (unsafe.Pointer)(__retValue)
+}
+func cgo_PlaceHolderScriptInstanceUpdate(p_placeholder unsafe.Pointer, p_properties unsafe.Pointer, p_values unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfacePlaceHolderScriptInstanceUpdate)(capi.PlaceHolderScriptInstanceUpdate)
+	arg1 := (C.GDExtensionScriptInstancePtr)(p_placeholder)
+	arg2 := (C.GDExtensionConstTypePtr)(p_properties)
+	arg3 := (C.GDExtensionConstTypePtr)(p_values)
+	C.cgo_GDExtensionInterfacePlaceHolderScriptInstanceUpdate(arg0, arg1, arg2, arg3)
+
+}
+func cgo_ObjectGetScriptInstance(p_object unsafe.Pointer, p_language unsafe.Pointer) unsafe.Pointer {
+	arg0 := (C.GDExtensionInterfaceObjectGetScriptInstance)(capi.ObjectGetScriptInstance)
+	arg1 := (C.GDExtensionConstObjectPtr)(p_object)
+	arg2 := (C.GDExtensionObjectPtr)(p_language)
+	__retValue := C.cgo_GDExtensionInterfaceObjectGetScriptInstance(arg0, arg1, arg2)
+	return (unsafe.Pointer)(__retValue)
+}
+func cgo_CallableCustomCreate(r_callable unsafe.Pointer, p_callable_custom_info unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceCallableCustomCreate)(capi.CallableCustomCreate)
+	arg1 := (C.GDExtensionUninitializedTypePtr)(r_callable)
+	arg2 := (*C.GDExtensionCallableCustomInfo)(p_callable_custom_info)
+	C.cgo_GDExtensionInterfaceCallableCustomCreate(arg0, arg1, arg2)
+
+}
+func cgo_CallableCustomCreate2(r_callable unsafe.Pointer, p_callable_custom_info unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceCallableCustomCreate2)(capi.CallableCustomCreate2)
+	arg1 := (C.GDExtensionUninitializedTypePtr)(r_callable)
+	arg2 := (*C.GDExtensionCallableCustomInfo2)(p_callable_custom_info)
+	C.cgo_GDExtensionInterfaceCallableCustomCreate2(arg0, arg1, arg2)
+
+}
+func cgo_CallableCustomGetUserData(p_callable unsafe.Pointer, p_token unsafe.Pointer) unsafe.Pointer {
+	arg0 := (C.GDExtensionInterfaceCallableCustomGetUserData)(capi.CallableCustomGetUserData)
+	arg1 := (C.GDExtensionConstTypePtr)(p_callable)
+	arg2 := unsafe.Pointer(p_token)
+	__retValue := C.cgo_GDExtensionInterfaceCallableCustomGetUserData(arg0, arg1, arg2)
+	return (unsafe.Pointer)(__retValue)
+}
+func cgo_ClassdbConstructObject(p_classname unsafe.Pointer) unsafe.Pointer {
+	arg0 := (C.GDExtensionInterfaceClassdbConstructObject)(capi.ClassdbConstructObject)
+	arg1 := (C.GDExtensionConstStringNamePtr)(p_classname)
+	__retValue := C.cgo_GDExtensionInterfaceClassdbConstructObject(arg0, arg1)
+	return (unsafe.Pointer)(__retValue)
+}
+func cgo_ClassdbGetMethodBind(p_classname unsafe.Pointer, p_methodname unsafe.Pointer, p_hash int64) unsafe.Pointer {
+	arg0 := (C.GDExtensionInterfaceClassdbGetMethodBind)(capi.ClassdbGetMethodBind)
+	arg1 := (C.GDExtensionConstStringNamePtr)(p_classname)
+	arg2 := (C.GDExtensionConstStringNamePtr)(p_methodname)
+	arg3 := (C.GDExtensionInt)(p_hash)
+	__retValue := C.cgo_GDExtensionInterfaceClassdbGetMethodBind(arg0, arg1, arg2, arg3)
+	return (unsafe.Pointer)(__retValue)
+}
+func cgo_ClassdbGetClassTag(p_classname unsafe.Pointer) unsafe.Pointer {
+	arg0 := (C.GDExtensionInterfaceClassdbGetClassTag)(capi.ClassdbGetClassTag)
+	arg1 := (C.GDExtensionConstStringNamePtr)(p_classname)
+	__retValue := C.cgo_GDExtensionInterfaceClassdbGetClassTag(arg0, arg1)
+	return (unsafe.Pointer)(__retValue)
+}
+func cgo_ClassdbRegisterExtensionClass(p_library unsafe.Pointer, p_class_name unsafe.Pointer, p_parent_class_name unsafe.Pointer, p_extension_funcs unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceClassdbRegisterExtensionClass)(capi.ClassdbRegisterExtensionClass)
+	arg1 := (C.GDExtensionClassLibraryPtr)(p_library)
+	arg2 := (C.GDExtensionConstStringNamePtr)(p_class_name)
+	arg3 := (C.GDExtensionConstStringNamePtr)(p_parent_class_name)
+	arg4 := (*C.GDExtensionClassCreationInfo)(p_extension_funcs)
+	C.cgo_GDExtensionInterfaceClassdbRegisterExtensionClass(arg0, arg1, arg2, arg3, arg4)
+
+}
+func cgo_ClassdbRegisterExtensionClass2(p_library unsafe.Pointer, p_class_name unsafe.Pointer, p_parent_class_name unsafe.Pointer, p_extension_funcs unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceClassdbRegisterExtensionClass2)(capi.ClassdbRegisterExtensionClass2)
+	arg1 := (C.GDExtensionClassLibraryPtr)(p_library)
+	arg2 := (C.GDExtensionConstStringNamePtr)(p_class_name)
+	arg3 := (C.GDExtensionConstStringNamePtr)(p_parent_class_name)
+	arg4 := (*C.GDExtensionClassCreationInfo2)(p_extension_funcs)
+	C.cgo_GDExtensionInterfaceClassdbRegisterExtensionClass2(arg0, arg1, arg2, arg3, arg4)
+
+}
+func cgo_ClassdbRegisterExtensionClass3(p_library unsafe.Pointer, p_class_name unsafe.Pointer, p_parent_class_name unsafe.Pointer, p_extension_funcs unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceClassdbRegisterExtensionClass3)(capi.ClassdbRegisterExtensionClass3)
+	arg1 := (C.GDExtensionClassLibraryPtr)(p_library)
+	arg2 := (C.GDExtensionConstStringNamePtr)(p_class_name)
+	arg3 := (C.GDExtensionConstStringNamePtr)(p_parent_class_name)
+	arg4 := (*C.GDExtensionClassCreationInfo3)(p_extension_funcs)
+	C.cgo_GDExtensionInterfaceClassdbRegisterExtensionClass3(arg0, arg1, arg2, arg3, arg4)
+
+}
+func cgo_ClassdbRegisterExtensionClassMethod(p_library unsafe.Pointer, p_class_name unsafe.Pointer, p_method_info unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceClassdbRegisterExtensionClassMethod)(capi.ClassdbRegisterExtensionClassMethod)
+	arg1 := (C.GDExtensionClassLibraryPtr)(p_library)
+	arg2 := (C.GDExtensionConstStringNamePtr)(p_class_name)
+	arg3 := (*C.GDExtensionClassMethodInfo)(p_method_info)
+	C.cgo_GDExtensionInterfaceClassdbRegisterExtensionClassMethod(arg0, arg1, arg2, arg3)
+
+}
+func cgo_ClassdbRegisterExtensionClassVirtualMethod(p_library unsafe.Pointer, p_class_name unsafe.Pointer, p_method_info unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceClassdbRegisterExtensionClassVirtualMethod)(capi.ClassdbRegisterExtensionClassVirtualMethod)
+	arg1 := (C.GDExtensionClassLibraryPtr)(p_library)
+	arg2 := (C.GDExtensionConstStringNamePtr)(p_class_name)
+	arg3 := (*C.GDExtensionClassVirtualMethodInfo)(p_method_info)
+	C.cgo_GDExtensionInterfaceClassdbRegisterExtensionClassVirtualMethod(arg0, arg1, arg2, arg3)
+
+}
+func cgo_ClassdbRegisterExtensionClassIntegerConstant(p_library unsafe.Pointer, p_class_name unsafe.Pointer, p_enum_name unsafe.Pointer, p_constant_name unsafe.Pointer, p_constant_value int64, p_is_bitfield bool) {
+	arg0 := (C.GDExtensionInterfaceClassdbRegisterExtensionClassIntegerConstant)(capi.ClassdbRegisterExtensionClassIntegerConstant)
+	arg1 := (C.GDExtensionClassLibraryPtr)(p_library)
+	arg2 := (C.GDExtensionConstStringNamePtr)(p_class_name)
+	arg3 := (C.GDExtensionConstStringNamePtr)(p_enum_name)
+	arg4 := (C.GDExtensionConstStringNamePtr)(p_constant_name)
+	arg5 := (C.GDExtensionInt)(p_constant_value)
+	arg6 := ToGdBool(p_is_bitfield)
+	C.cgo_GDExtensionInterfaceClassdbRegisterExtensionClassIntegerConstant(arg0, arg1, arg2, arg3, arg4, arg5, arg6)
+
+}
+func cgo_ClassdbRegisterExtensionClassProperty(p_library unsafe.Pointer, p_class_name unsafe.Pointer, p_info unsafe.Pointer, p_setter unsafe.Pointer, p_getter unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceClassdbRegisterExtensionClassProperty)(capi.ClassdbRegisterExtensionClassProperty)
+	arg1 := (C.GDExtensionClassLibraryPtr)(p_library)
+	arg2 := (C.GDExtensionConstStringNamePtr)(p_class_name)
+	arg3 := (*C.GDExtensionPropertyInfo)(p_info)
+	arg4 := (C.GDExtensionConstStringNamePtr)(p_setter)
+	arg5 := (C.GDExtensionConstStringNamePtr)(p_getter)
+	C.cgo_GDExtensionInterfaceClassdbRegisterExtensionClassProperty(arg0, arg1, arg2, arg3, arg4, arg5)
+
+}
+func cgo_ClassdbRegisterExtensionClassPropertyIndexed(p_library unsafe.Pointer, p_class_name unsafe.Pointer, p_info unsafe.Pointer, p_setter unsafe.Pointer, p_getter unsafe.Pointer, p_index int64) {
+	arg0 := (C.GDExtensionInterfaceClassdbRegisterExtensionClassPropertyIndexed)(capi.ClassdbRegisterExtensionClassPropertyIndexed)
+	arg1 := (C.GDExtensionClassLibraryPtr)(p_library)
+	arg2 := (C.GDExtensionConstStringNamePtr)(p_class_name)
+	arg3 := (*C.GDExtensionPropertyInfo)(p_info)
+	arg4 := (C.GDExtensionConstStringNamePtr)(p_setter)
+	arg5 := (C.GDExtensionConstStringNamePtr)(p_getter)
+	arg6 := (C.GDExtensionInt)(p_index)
+	C.cgo_GDExtensionInterfaceClassdbRegisterExtensionClassPropertyIndexed(arg0, arg1, arg2, arg3, arg4, arg5, arg6)
+
+}
+func cgo_ClassdbRegisterExtensionClassPropertyGroup(p_library unsafe.Pointer, p_class_name unsafe.Pointer, p_group_name unsafe.Pointer, p_prefix unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceClassdbRegisterExtensionClassPropertyGroup)(capi.ClassdbRegisterExtensionClassPropertyGroup)
+	arg1 := (C.GDExtensionClassLibraryPtr)(p_library)
+	arg2 := (C.GDExtensionConstStringNamePtr)(p_class_name)
+	arg3 := (C.GDExtensionConstStringPtr)(p_group_name)
+	arg4 := (C.GDExtensionConstStringPtr)(p_prefix)
+	C.cgo_GDExtensionInterfaceClassdbRegisterExtensionClassPropertyGroup(arg0, arg1, arg2, arg3, arg4)
+
+}
+func cgo_ClassdbRegisterExtensionClassPropertySubgroup(p_library unsafe.Pointer, p_class_name unsafe.Pointer, p_subgroup_name unsafe.Pointer, p_prefix unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceClassdbRegisterExtensionClassPropertySubgroup)(capi.ClassdbRegisterExtensionClassPropertySubgroup)
+	arg1 := (C.GDExtensionClassLibraryPtr)(p_library)
+	arg2 := (C.GDExtensionConstStringNamePtr)(p_class_name)
+	arg3 := (C.GDExtensionConstStringPtr)(p_subgroup_name)
+	arg4 := (C.GDExtensionConstStringPtr)(p_prefix)
+	C.cgo_GDExtensionInterfaceClassdbRegisterExtensionClassPropertySubgroup(arg0, arg1, arg2, arg3, arg4)
+
+}
+func cgo_ClassdbRegisterExtensionClassSignal(p_library unsafe.Pointer, p_class_name unsafe.Pointer, p_signal_name unsafe.Pointer, p_argument_info unsafe.Pointer, p_argument_count int64) {
+	arg0 := (C.GDExtensionInterfaceClassdbRegisterExtensionClassSignal)(capi.ClassdbRegisterExtensionClassSignal)
+	arg1 := (C.GDExtensionClassLibraryPtr)(p_library)
+	arg2 := (C.GDExtensionConstStringNamePtr)(p_class_name)
+	arg3 := (C.GDExtensionConstStringNamePtr)(p_signal_name)
+	arg4 := (*C.GDExtensionPropertyInfo)(p_argument_info)
+	arg5 := (C.GDExtensionInt)(p_argument_count)
+	C.cgo_GDExtensionInterfaceClassdbRegisterExtensionClassSignal(arg0, arg1, arg2, arg3, arg4, arg5)
+
+}
+func cgo_ClassdbUnregisterExtensionClass(p_library unsafe.Pointer, p_class_name unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceClassdbUnregisterExtensionClass)(capi.ClassdbUnregisterExtensionClass)
+	arg1 := (C.GDExtensionClassLibraryPtr)(p_library)
+	arg2 := (C.GDExtensionConstStringNamePtr)(p_class_name)
+	C.cgo_GDExtensionInterfaceClassdbUnregisterExtensionClass(arg0, arg1, arg2)
+
+}
+func cgo_GetLibraryPath(p_library unsafe.Pointer, r_path unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceGetLibraryPath)(capi.GetLibraryPath)
+	arg1 := (C.GDExtensionClassLibraryPtr)(p_library)
+	arg2 := (C.GDExtensionUninitializedStringPtr)(r_path)
+	C.cgo_GDExtensionInterfaceGetLibraryPath(arg0, arg1, arg2)
+
+}
+func cgo_EditorAddPlugin(p_class_name unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceEditorAddPlugin)(capi.EditorAddPlugin)
+	arg1 := (C.GDExtensionConstStringNamePtr)(p_class_name)
+	C.cgo_GDExtensionInterfaceEditorAddPlugin(arg0, arg1)
+
+}
+func cgo_EditorRemovePlugin(p_class_name unsafe.Pointer) {
+	arg0 := (C.GDExtensionInterfaceEditorRemovePlugin)(capi.EditorRemovePlugin)
+	arg1 := (C.GDExtensionConstStringNamePtr)(p_class_name)
+	C.cgo_GDExtensionInterfaceEditorRemovePlugin(arg0, arg1)
+
+}
