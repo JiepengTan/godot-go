@@ -6,6 +6,7 @@ package ffi
 import (
 	"bytes"
 	_ "embed"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -59,7 +60,7 @@ func Generate(projectPath string, ast clang.CHeaderFileAST) {
 func GenerateGDExtensionWrapperHeaderFile(projectPath string, ast clang.CHeaderFileAST) error {
 	tmpl, err := template.New("ffi_wrapper.gen.h").
 		Funcs(template.FuncMap{
-			"snakeCase": strcase.ToSnake,
+			"genFFIHeader": genFFIHeader,
 		}).
 		Parse(ffiWrapperHeaderFileText)
 	if err != nil {
@@ -84,6 +85,82 @@ func GenerateGDExtensionWrapperHeaderFile(projectPath string, ast clang.CHeaderF
 		return err
 	}
 	return nil
+}
+
+var (
+	tempStrBuilder strings.Builder
+)
+
+func writeLine(format string, a ...any) {
+	write(format, a...)
+	tempStrBuilder.WriteString("\n")
+}
+func write(format string, a ...any) {
+	tempStrBuilder.WriteString(fmt.Sprintf(format, a...))
+}
+func genFFIHeader(ast clang.CHeaderFileAST) string {
+	tempStrBuilder = strings.Builder{}
+	// deal functions
+	funcs := ast.CollectFunctions()
+	for _, f := range funcs {
+		//int cgo_PtrSetter(const pointer fn,GDExtensionTypePtr* p_base)
+		write("%s cgo_%s(", f.ReturnType.CStyleString(), f.Name)
+		write("const %s fn", f.Name)
+		for j, a := range f.Arguments {
+			write(",%s", a.CStyleString(j))
+		}
+		writeLine(") {")
+
+		//return fn(p_base) };
+		if f.ReturnType.CStyleString() != "void" {
+			write("\treturn")
+		}
+		write(" fn(")
+		for j, a := range f.Arguments {
+			write("%s", a.ResolvedName(j))
+			if j != len(f.Arguments)-1 {
+				write(",")
+			}
+		}
+		write(");")
+		writeLine("\n}")
+	}
+	writeLine("\n\n\n// -------------------- Structs ------------------------- ")
+
+	stucts := ast.CollectStructs()
+	{
+		for _, t := range stucts {
+			if len(t.CollectFunctions()) == 0 {
+				continue
+			}
+			for _, f := range t.CollectFunctions() {
+				// void cgo_GDExtensionInitialization_initialize(const GDExtensionInitialization * p_struct, void *  userdata, GDExtensionInitializationLevel p_level){
+				write("%s cgo_%s_%s(", f.ReturnType.CStyleString(), t.Name, f.Name)
+				write("const %s * p_struct", t.Name)
+				for j, a := range f.Arguments {
+					write(",%s", a.CStyleString(j))
+				}
+				writeLine(") {")
+
+				//p_struct->initialize(userdata, p_level);
+				if f.ReturnType.CStyleString() != "void" {
+					write("\treturn")
+				}
+				write(" p_struct->%s(", f.Name)
+				for j, a := range f.Arguments {
+					write("%s", a.ResolvedName(j))
+					if j != len(f.Arguments)-1 {
+						write(",")
+					}
+				}
+				write(");")
+				writeLine("\n}")
+
+			}
+		}
+	}
+
+	return tempStrBuilder.String()
 }
 
 func GenerateGDExtensionWrapperGoFile(projectPath string, ast clang.CHeaderFileAST) error {
