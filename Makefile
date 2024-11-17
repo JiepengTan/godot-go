@@ -17,4 +17,4 @@ web:
 
 gen:
 	cd ./cmd/codegen && go run . && cd ../../ && \
-	$(MAKE) fmt && $(MAKE) fmt 
+	$(MAKE) fmt 

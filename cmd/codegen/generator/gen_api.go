@@ -5,6 +5,7 @@ package generator
 
 import (
 	_ "embed"
+	"fmt"
 	"strings"
 	"text/template"
 
@@ -27,6 +28,49 @@ func codeGenAPIGo() error {
 }
 func genAPIGo(ast clang.CHeaderFileAST) string {
 	tempStrBuilder = strings.Builder{}
-	WriteLine("")
+	funcs := ast.CollectGDExtensionInterfaceFunctions()
+	for _, f := range funcs {
+		params := ""
+		for j, a := range f.Arguments {
+			name := a.Name
+			if a.Name == "" {
+				name = fmt.Sprintf("_funcPtr%d ", j)
+			}
+			params += name + " " + ToGoTypeString(a.Type)
+			if a.Name == "" {
+				params += fmt.Sprintf("/*%s*/", a.Type.CStyleString())
+			}
+			if j != len(f.Arguments)-1 {
+				params += ","
+			}
+		}
+		WriteLine("%s func(%s)", strings.Replace(f.Name, "GDExtensionInterface", "", 1), params)
+	}
 	return tempStrBuilder.String()
+}
+
+var (
+	typeMap = map[string]string{
+		"size_t":                     "int64",
+		"int32_t":                    "int32",
+		"uint32_t":                   "uint32",
+		"int64_t":                    "int64",
+		"uint64_t":                   "uint64",
+		"GDObjectInstanceID":         "int64",
+		"GDExtensionInt":             "int64",
+		"GDExtensionVariantType":     "any/*VariantType*/",
+		"GDExtensionVariantOperator": "any/*VariantOperator*/",
+		"GDExtensionBool":            "bool",
+		"char32_t":                   "rune",
+	}
+)
+
+func ToGoTypeString(t clang.Type) string {
+	return toGoTypeString(t.GoString())
+}
+func toGoTypeString(typeName string) string {
+	if value, exists := typeMap[typeName]; exists {
+		return value
+	}
+	return typeName
 }

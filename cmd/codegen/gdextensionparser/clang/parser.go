@@ -49,34 +49,11 @@ func (a CHeaderFileAST) CollectFunctionsOfClass(className string) []TypedefFunct
 
 	fns := make([]TypedefFunction, 0, len(allFns))
 
-	prefix := "GDExtensionSpx" + className
+	prefix := "GDExtension" + className
 	for _, fn := range allFns {
 		if strings.HasPrefix(fn.Name, prefix) &&
-			!strings.HasPrefix(fn.Name, "GDExtensionSpxCallback") &&
-			!strings.HasPrefix(fn.Name, "GDExtensionSpxString") &&
-			!strings.HasPrefix(fn.Name, "GDExtensionSpxVariant") &&
-			!strings.HasPrefix(fn.Name, "GDExtensionSpxGlobal") &&
 			!slices.Contains(legacyGDExtentionInterfaceFunctionNames, fn.Name) {
 			fns = append(fns, fn)
-		}
-	}
-
-	return fns
-}
-
-func (a CHeaderFileAST) CollectGDExtensionManagerFunctions(managerName string) []TypedefFunction {
-	allFns := a.CollectFunctions()
-
-	fns := make([]TypedefFunction, 0, len(allFns))
-
-	for _, fn := range allFns {
-		if strings.HasPrefix(fn.Name, "GDExtensionSpx") &&
-			!strings.HasPrefix(fn.Name, "GDExtensionSpxCallback") &&
-			!slices.Contains(legacyGDExtentionInterfaceFunctionNames, fn.Name) {
-			funcName := fn.Name[len("GDExtensionSpx"):]
-			if strings.HasPrefix(strings.ToLower(funcName), managerName) {
-				fns = append(fns, fn)
-			}
 		}
 	}
 
@@ -91,48 +68,6 @@ func (a CHeaderFileAST) CollectGDExtensionInterfaceFunctions() []TypedefFunction
 	for _, fn := range allFns {
 		if strings.HasPrefix(fn.Name, "GDExtensionInterface") &&
 			!slices.Contains(legacyGDExtentionInterfaceFunctionNames, fn.Name) {
-			fns = append(fns, fn)
-		}
-	}
-
-	return fns
-}
-
-func (a CHeaderFileAST) CollectGDExtensionISpriteFunctions() []TypedefFunction {
-	allFns := a.CollectFunctions()
-
-	fns := make([]TypedefFunction, 0, len(allFns))
-
-	for _, fn := range allFns {
-		if strings.HasPrefix(fn.Name, "GDExtensionSpxSprite") &&
-			!slices.Contains(legacyGDExtentionInterfaceFunctionNames, fn.Name) {
-			fns = append(fns, fn)
-		}
-	}
-
-	return fns
-}
-func (a CHeaderFileAST) CollectGDExtensionICallbackFunctions() []TypedefFunction {
-	allFns := a.CollectFunctions()
-
-	fns := make([]TypedefFunction, 0, len(allFns))
-
-	for _, fn := range allFns {
-		if strings.HasPrefix(fn.Name, "GDExtensionSpxCallback") &&
-			!slices.Contains(legacyGDExtentionInterfaceFunctionNames, fn.Name) {
-			fns = append(fns, fn)
-		}
-	}
-	return fns
-}
-
-func (a CHeaderFileAST) CollectNonGDExtensionInterfaceFunctions() []TypedefFunction {
-	allFns := a.CollectFunctions()
-
-	fns := make([]TypedefFunction, 0, len(allFns))
-
-	for _, fn := range allFns {
-		if !strings.HasPrefix(fn.Name, "GDExtensionSpx") {
 			fns = append(fns, fn)
 		}
 	}
@@ -247,6 +182,10 @@ func (t FunctionType) CStyleString() string {
 	return sb.String()
 }
 
+func (t FunctionType) GoString() string {
+	return "unsafe.Pointer"
+}
+
 type PrimativeType struct {
 	IsConst   bool   `parser:" @'const'? " json:",omitempty"`
 	Name      string `parser:" @Ident    " json:",omitempty"`
@@ -268,10 +207,26 @@ func (t PrimativeType) CStyleString() string {
 
 	return sb.String()
 }
+func (t PrimativeType) GoString() string {
+	if t.IsPointer || strings.HasSuffix(t.Name, "Ptr") {
+		return "unsafe.Pointer"
+	} else {
+		return t.Name
+	}
+}
 
 type Type struct {
 	Function  *FunctionType  `parser:" ( @@   " json:",omitempty"`
 	Primative *PrimativeType `parser:" | @@ ) " json:",omitempty"`
+}
+
+func (t Type) GoString() string {
+	if t.Primative != nil {
+		return t.Primative.GoString()
+	} else if t.Function != nil {
+		return t.Function.GoString()
+	}
+	panic("unhandled type")
 }
 
 func (t Type) CStyleString() string {
