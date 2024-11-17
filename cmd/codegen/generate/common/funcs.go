@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	RelDir = "../../internal/ffi"
+	GenerateRelDir = "../../internal/"
 )
 
 func Add(a int, b int) int {
@@ -381,11 +381,6 @@ var (
 	managerSet = map[string]bool{}
 	cppType2Go = map[string]string{}
 )
-
-type ManagerData struct {
-	Ast     clang.CHeaderFileAST
-	Mangers []string
-}
 
 func GetManagerName(str string) string {
 	prefix := "GDExtensionSpx"

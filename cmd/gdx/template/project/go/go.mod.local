@@ -1,4 +1,4 @@
-module gdg-demo
+module gdx-demo
 
 go 1.22.0
 

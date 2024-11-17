@@ -5,5 +5,5 @@ if exist ..\test (
     rmdir /s /q ..\test
 )
 
-gdg init ../test
-gdg run ../test
+gdx init ../test
+gdx run ../test

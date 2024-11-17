@@ -3,14 +3,14 @@ package main
 import (
 	"unsafe"
 
-	gdg "github.com/JiepengTan/godotgo"
+	gdx "github.com/JiepengTan/godotgo"
 )
 
 import "C"
 
 func main() {
 	RegisterTypes()
-	gdg.LinkEngine(gdg.EngineCallbacks{
+	gdx.LinkEngine(gdx.EngineCallbacks{
 		OnEngineStart:   onStart,
 		OnEngineUpdate:  onUpdate,
 		OnEngineDestroy: onDestory,

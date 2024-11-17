@@ -1,8 +1,10 @@
 .DEFAULT_GOAL := pc
 
 CURRENT_PATH=$(shell pwd)
-.PHONY: engine init initweb fmt gen 
+.PHONY: engine init initweb fmt gen test
 
+test:
+	cd ./test/ && go run . && cd ../
 
 fmt:
 	go fmt ./... 

@@ -14,8 +14,8 @@ import (
 
 	_ "embed"
 
-	"github.com/JiepengTan/godotgo/cmd/gdg/pkg/impl"
-	"github.com/JiepengTan/godotgo/cmd/gdg/pkg/util"
+	"github.com/JiepengTan/godotgo/cmd/gdx/pkg/impl"
+	"github.com/JiepengTan/godotgo/cmd/gdx/pkg/util"
 )
 
 var (
@@ -25,8 +25,8 @@ var (
 	//go:embed template/version
 	version string
 
-	//go:embed template/project/.godot/gdg_web_server.py
-	gdg_web_server_py string
+	//go:embed template/project/.godot/gdx_web_server.py
+	gdx_web_server_py string
 
 	//go:embed template/project/.godot/extension_list.cfg
 	extension_list_cfg string
@@ -43,8 +43,8 @@ var (
 	//go:embed template/project/project.godot
 	project_godot string
 
-	//go:embed template/project/gdg.gdextension
-	gdg_gdextension string
+	//go:embed template/project/gdx.gdextension
+	gdx_gdextension string
 
 	//go:embed template/project/main.tscn
 	main_tscn string
@@ -67,7 +67,7 @@ var (
 )
 
 func ShowHelpInfo() {
-	showHelpInfo("gdg")
+	showHelpInfo("gdx")
 }
 func showHelpInfo(cmdName string) {
 	msg := `
@@ -126,10 +126,10 @@ func PrepareGoEnv() {
 	err = util.RunGolang(nil, "mod", "tidy")
 	os.Chdir(rawDir)
 	if err != nil {
-		println("gdg project create failed ", targetDir)
+		println("gdx project create failed ", targetDir)
 		panic(err)
 	} else {
-		println("gdg project create succ ", targetDir, "\n=====you can type  'gdg run "+targetDir+"'  to run the project======")
+		println("gdx project create succ ", targetDir, "\n=====you can type  'gdx run "+targetDir+"'  to run the project======")
 	}
 
 }
@@ -142,12 +142,12 @@ func SetupEnv() error {
 		GOARCH = os.Getenv("GOARCH")
 	}
 	if GOARCH != "amd64" && GOARCH != "arm64" {
-		return errors.New("gdg requires an amd64, or an arm64 system")
+		return errors.New("gdx requires an amd64, or an arm64 system")
 	}
 	var err error
 	binPostfix, cmdPath, err = impl.CheckAndGetAppPath(version)
 	if err != nil {
-		return fmt.Errorf("gdg requires Godot to be installed as a binary at $GOPATH/bin/: %w", err)
+		return fmt.Errorf("gdx requires Godot to be installed as a binary at $GOPATH/bin/: %w", err)
 	}
 	projectPath, _ = filepath.Abs(targetDir)
 	goPath, _ = filepath.Abs(projectPath + "/go")
@@ -156,7 +156,7 @@ func SetupEnv() error {
 
 	for wd := wd; true; wd = filepath.Dir(wd) {
 		if wd == "/" {
-			return fmt.Errorf("gdg requires your project to have a go.mod file")
+			return fmt.Errorf("gdx requires your project to have a go.mod file")
 		}
 		_, err := os.Stat(wd + "/go.mod")
 		if err == nil {
@@ -168,7 +168,7 @@ func SetupEnv() error {
 		}
 	}
 
-	var libraryName = fmt.Sprintf("gdg-%v-%v", GOOS, GOARCH)
+	var libraryName = fmt.Sprintf("gdx-%v-%v", GOOS, GOARCH)
 	switch GOOS {
 	case "windows":
 		libraryName += ".dll"
@@ -185,7 +185,7 @@ func SetupEnv() error {
 	util.SetupFile(false, projectPath+"/main.tscn", main_tscn)
 	util.SetupFile(false, projectPath+"/project.godot", project_godot)
 	util.SetupFile(false, projectPath+"/.gitignore", gitignore)
-	util.SetupFile(true, projectPath+"/gdg.gdextension", gdg_gdextension)
+	util.SetupFile(true, projectPath+"/gdx.gdextension", gdx_gdextension)
 	util.SetupFile(false, projectPath+"/.godot/extension_list.cfg", extension_list_cfg)
 	if !hasInited {
 		BuildDll()
@@ -196,7 +196,7 @@ func SetupEnv() error {
 
 func ExportWebEditor() error {
 	gopath := build.Default.GOPATH
-	editorZipPath := path.Join(gopath, "bin", "gdg"+version+"_web.zip")
+	editorZipPath := path.Join(gopath, "bin", "gdx"+version+"_web.zip")
 	dstPath := path.Join(projectPath, ".builds/web")
 	os.MkdirAll(dstPath, os.ModePerm)
 	if util.IsFileExist(editorZipPath) {
@@ -219,7 +219,7 @@ func ExportWeb() error {
 	// Delete gdextension
 	os.RemoveAll(filepath.Join(projectPath, "lib"))
 	os.Remove(filepath.Join(projectPath, ".godot", "extension_list.cfg"))
-	os.Remove(filepath.Join(projectPath, "gdg.gdextension"))
+	os.Remove(filepath.Join(projectPath, "gdx.gdextension"))
 	// Copy template files
 	util.SetupFile(false, filepath.Join(projectPath, "export_presets.cfg"), export_presets_cfg)
 
@@ -242,7 +242,7 @@ func StopWebServer() {
 		cmd.Run()
 		os.Remove(tempFileName)
 	} else {
-		cmd := exec.Command("pkill", "-f", "gdg_web_server.py")
+		cmd := exec.Command("pkill", "-f", "gdx_web_server.py")
 		cmd.Run()
 	}
 }
@@ -252,9 +252,9 @@ func RunWebServer() error {
 	}
 	port := serverPort
 	StopWebServer()
-	scriptPath := filepath.Join(projectPath, ".godot", "gdg_web_server.py")
+	scriptPath := filepath.Join(projectPath, ".godot", "gdx_web_server.py")
 	executeDir := filepath.Join(projectPath, "../", ".builds/web")
-	util.SetupFile(false, scriptPath, gdg_web_server_py)
+	util.SetupFile(false, scriptPath, gdx_web_server_py)
 	println("web server running at http://localhost:" + fmt.Sprint(port))
 	cmd := exec.Command("python", scriptPath, "-r", executeDir, "-p", fmt.Sprint(port))
 	err := cmd.Start()
@@ -268,12 +268,12 @@ func Export() error {
 	platform := "Win"
 	args := "--headless --quit --export-debug " + platform
 	println("run: ", cmdPath, projectPath, args)
-	gdg := exec.Command(cmdPath, args)
-	gdg.Dir = projectPath
-	gdg.Stderr = os.Stderr
-	gdg.Stdout = os.Stdout
-	gdg.Stdin = os.Stdin
-	return gdg.Run()
+	gdx := exec.Command(cmdPath, args)
+	gdx.Dir = projectPath
+	gdx.Stderr = os.Stderr
+	gdx.Stdout = os.Stdout
+	gdx.Stdin = os.Stdin
+	return gdx.Run()
 }
 
 func BuildDll() {
@@ -288,7 +288,7 @@ func BuildWasm() {
 	rawdir, _ := os.Getwd()
 	dir := path.Join(projectPath, ".builds/web/")
 	os.MkdirAll(dir, 0755)
-	filePath := path.Join(dir, "gdg.wasm")
+	filePath := path.Join(dir, "gdx.wasm")
 	os.Chdir(goPath)
 	envVars := []string{"GOOS=js", "GOARCH=wasm"}
 	util.RunGolang(envVars, "build", "-o", filePath)
@@ -321,7 +321,7 @@ func ImportProj() error {
 
 func Run(args string) error {
 	util.SetupFile(false, filepath.Join(projectPath, ".godot", "extension_list.cfg"), extension_list_cfg)
-	util.SetupFile(false, filepath.Join(projectPath, "gdg.gdextension"), gdg_gdextension)
+	util.SetupFile(false, filepath.Join(projectPath, "gdx.gdextension"), gdx_gdextension)
 
 	println("run: ", cmdPath, projectPath, args)
 	cmd := exec.Command(cmdPath, args)

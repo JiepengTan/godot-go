@@ -13,7 +13,7 @@ import (
 
 	_ "embed"
 
-	"github.com/JiepengTan/godotgo/cmd/gdg/pkg/util"
+	"github.com/JiepengTan/godotgo/cmd/gdx/pkg/util"
 )
 
 func findFirstMatchingFile(dir, pattern, exclude string) string {
@@ -108,12 +108,12 @@ func CheckAndGetAppPath(version string) (string, string, error) {
 	if gopath == "" {
 		gopath = build.Default.GOPATH
 	}
-	tagName := "gdg" + version
+	tagName := "gdx" + version
 	dstFileName := tagName + binPostfix
-	gdg, err := exec.LookPath(dstFileName)
+	gdx, err := exec.LookPath(dstFileName)
 	if err == nil {
-		if _, err := exec.Command(gdg, "--version").CombinedOutput(); err == nil {
-			return binPostfix, gdg, nil
+		if _, err := exec.Command(gdx, "--version").CombinedOutput(); err == nil {
+			return binPostfix, gdx, nil
 		}
 	}
 
@@ -121,7 +121,7 @@ func CheckAndGetAppPath(version string) (string, string, error) {
 	cmdPath := path.Join(dstDir, dstFileName)
 	info, err := os.Stat(cmdPath)
 	if os.IsNotExist(err) {
-		println("Downloading gdg pack...")
+		println("Downloading gdx pack...")
 		err := downloadPack(dstDir, tagName, binPostfix)
 		if err != nil {
 			print("downloadPack error:" + err.Error())

@@ -2,7 +2,7 @@
 
 
 GOPATH=$(go env GOPATH)
-VERSION=$(cat ./cmd/gdg/template/version)
+VERSION=$(cat ./cmd/gdx/template/version)
 echo "version="$VERSION " GOPATH=" $GOPATH
 
 pip install scons==4.7.0
@@ -30,7 +30,7 @@ fi
 cd ..
 
 echo "init engine done."
-dstBinPath="$GOPATH/bin/gdg$VERSION"
+dstBinPath="$GOPATH/bin/gdx$VERSION"
 echo "Destination binary path: $dstBinPath"
 if [ "$OS" = "Windows_NT" ]; then
     cp godot/bin/godot.windows.editor.dev.x86_64 $dstBinPath"_win.exe"

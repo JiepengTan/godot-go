@@ -2,7 +2,7 @@
 # build godot web version
 
 GOPATH=$(go env GOPATH)
-VERSION=$(cat ./cmd/gdg/template/version)
+VERSION=$(cat ./cmd/gdx/template/version)
 echo "version="$VERSION " GOPATH=" $GOPATH
 
 # make sure emsdk's version is same as godot build system
@@ -33,12 +33,12 @@ cd godot
 # build web editor for interupter mode
 scons platform=web target=editor
 mv bin/godot.web.editor.wasm32.zip bin/web_editor.zip
-cp bin/web_editor.zip $GOPATH/bin/gdg$VERSION"_web.zip"
+cp bin/web_editor.zip $GOPATH/bin/gdx$VERSION"_web.zip"
 
 cd ..
 
 cd godot
-# gdg disable gdextension
+# gdx disable gdextension
 #scons platform=web target=template_debug threads=no dlink_enabled=yes 
 #mv bin/godot.web.template_debug.wasm32.dlink.zip bin/web_dlink_debug.zip
 # Get the path to the AppData\Roaming directory
@@ -62,5 +62,5 @@ cp bin/web_dlink_debug.zip "$gd_template_path/web_debug.zip"
 cp bin/web_dlink_debug.zip "$gd_template_path/web_release.zip"
 
 # copy to tool dir
-cp bin/web_dlink_debug.zip $GOPATH/bin/gdg$VERSION"_webpack.zip"
+cp bin/web_dlink_debug.zip $GOPATH/bin/gdx$VERSION"_webpack.zip"
 cd ..

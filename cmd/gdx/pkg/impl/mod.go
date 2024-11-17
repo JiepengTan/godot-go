@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/JiepengTan/godotgo/cmd/gdg/pkg/util"
+	"github.com/JiepengTan/godotgo/cmd/gdx/pkg/util"
 )
 
 func getLatestCommitHash() (string, error) {
@@ -141,7 +141,7 @@ func UpdateMod() {
 	}
 
 	dirList := []string{}
-	fileList := []string{"cmd/gdg/config/project//scriptsgo.mod"}
+	fileList := []string{"cmd/gdx/config/project//scriptsgo.mod"}
 
 	replaceMod(tag, version, dirList, relDir, fileList)
 

@@ -12,7 +12,7 @@ package ffi
 
 //revive:disable
 
-// #include "gdextension_spx_codegen_header.h"
+// #include "gdextension_interface.h"
 // #include "ffi_wrapper.gen.h"
 // #include <stdint.h>
 // #include <stdio.h>
